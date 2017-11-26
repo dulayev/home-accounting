@@ -152,6 +152,15 @@ namespace Home_Accounting
             public string sourceText;
         };
 
+        private static string trimSymmetric(string text, char symbol)
+        {
+            while (text.Length >= 2 && text[0] == symbol && text[text.Length - 1] == symbol)
+            {
+                text = text.Substring(1, text.Length - 2);
+            }
+            return text;
+        }
+
         private void loadStatement()
         {
             int accountID = 0;
@@ -181,43 +190,113 @@ namespace Home_Accounting
                         transactions.Add(transaction);
                     }
                 }
-                else if(dialog.FileName.EndsWith(".csv")) // processing citibank
+                else if(dialog.FileName.EndsWith(".csv")) 
                 {
-                    accountID = 13;
-
-                    // read csv into list
-                    string[] lines = System.IO.File.ReadAllLines(dialog.FileName, Encoding.Default);
-                    string[] headerFields = lines[0].Split(',');
-                    int typeIndex = Array.IndexOf(headerFields, "type");
-                    Trace.Assert(typeIndex >= 0);
-                    int amountIndex = Array.IndexOf(headerFields, "amount");
-                    Trace.Assert(amountIndex >= 0);
-                    int descriptionIndex = Array.IndexOf(headerFields, "description");
-                    Trace.Assert(descriptionIndex >= 0);
-                    int timeIndex = Array.IndexOf(headerFields, "timestamp");
-                    Trace.Assert(timeIndex >= 0);
-
-                    for(int i = 1; i < lines.Length; i++) // ignore first line - header
+                    if (dialog.FileName.StartsWith("report")) // processing russian standard
                     {
-                        string line = lines[i];
-                        string[] fields = line.Split(',');
+                        accountID = 13;
 
-                        Transaction transaction = new Transaction();
-                        int type = int.Parse(fields[typeIndex]);
-                        transaction.date = DateTime.Parse(fields[timeIndex]);
-                        transaction.description = fields[descriptionIndex];
-                        Decimal amount = Decimal.Parse(fields[amountIndex]);
-                        if(type == 0)
+                        // read csv into list
+                        string[] lines = System.IO.File.ReadAllLines(dialog.FileName, Encoding.Default);
+                        string[] headerFields = lines[0].Split(',');
+                        int typeIndex = Array.IndexOf(headerFields, "type");
+                        Trace.Assert(typeIndex >= 0);
+                        int amountIndex = Array.IndexOf(headerFields, "amount");
+                        Trace.Assert(amountIndex >= 0);
+                        int descriptionIndex = Array.IndexOf(headerFields, "description");
+                        Trace.Assert(descriptionIndex >= 0);
+                        int timeIndex = Array.IndexOf(headerFields, "timestamp");
+                        Trace.Assert(timeIndex >= 0);
+
+                        for (int i = 1; i < lines.Length; i++) // ignore first line - header
                         {
-                            amount = -amount;
-                        }
-                        transaction.amount = amount;
-                        transaction.sourceText = line;
+                            string line = lines[i];
+                            string[] fields = line.Split(',');
 
-                        transactions.Add(transaction);
+                            Transaction transaction = new Transaction();
+                            int type = int.Parse(fields[typeIndex]);
+                            transaction.date = DateTime.Parse(fields[timeIndex]);
+                            transaction.description = fields[descriptionIndex];
+                            Decimal amount = Decimal.Parse(fields[amountIndex]);
+                            if (type == 0)
+                            {
+                                amount = -amount;
+                            }
+                            transaction.amount = amount;
+                            transaction.sourceText = line;
+
+                            transactions.Add(transaction);
+                        }
+                    }
+                    else if (Path.GetFileName(dialog.FileName).StartsWith("avangard-")) // processing avangard
+                    {
+                        accountID = 17;
+
+                        // read csv into list
+                        string[] lines = System.IO.File.ReadAllLines(dialog.FileName, Encoding.Default);
+
+                        for (int i = 0; i < lines.Length; i++)
+                        {
+                            string line = lines[i];
+                            string[] fields = line.Split(';');
+                            for(int j = 0; j < fields.Length; j++)
+                            {
+                                fields[j] = fields[j].Trim('\"');
+                            }
+
+                            Transaction transaction = new Transaction();
+                            transaction.sourceText = line;
+                            try
+                            {
+
+                                transaction.date = DateTime.Parse(fields[0]);
+                                String credit = fields[1];
+                                String debit = fields[2];
+                                if ((debit == String.Empty) == (credit == String.Empty))
+                                    throw new Exception("Only debit or credit should be not empty");
+
+                                if (debit != String.Empty)
+                                {
+                                    transaction.amount = -Decimal.Parse(debit);
+                                    transaction.description = String.Format("{0} {1} {2}{3} {4}", 
+                                        fields[3], fields[4], fields[6], fields[7], fields[9]);
+                                }
+                                else
+                                {
+                                    transaction.amount = Decimal.Parse(credit);
+                                    transaction.description = fields[3];
+                                }
+                            }
+                            catch(Exception)
+                            {
+                                transaction.amount = 0;
+                            }
+                            transactions.Add(transaction);
+                        }
+                    }
+                    else if (Path.GetFileName(dialog.FileName).StartsWith("statement_")) // processing Sankt-Peterburg
+                    {
+                        accountID = 19;
+
+                        // read csv into list
+                        string[] lines = System.IO.File.ReadAllLines(dialog.FileName, Encoding.Default);
+                        foreach (string line in lines)
+                        {
+                            if (char.IsDigit(line[0]))
+                            {
+                                string[] fields = line.Split(';');
+
+                                Transaction transaction = new Transaction();
+                                transaction.date = DateTime.Parse(fields[0]);
+                                transaction.description = trimSymmetric(fields[2], '\"') + " " + trimSymmetric(fields[3], '\"');
+                                transaction.amount = Decimal.Parse(fields[4]);
+                                transaction.sourceText = line;
+
+                                transactions.Add(transaction);
+                            }
+                        }
                     }
                 }
-
                 if(accountID == 0)
                 {
                     MessageBox.Show(dialog.FileName + " is unknown");
