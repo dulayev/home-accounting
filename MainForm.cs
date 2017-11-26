@@ -161,6 +161,25 @@ namespace Home_Accounting
             return text;
         }
 
+        private static string[] splitToFields(string text, char delimiter)
+        {
+            List<String> list = new List<String>();
+            int startField = 0;
+            int delimitersMet = 0;
+            for(int i = 0; i < text.Length; i++)
+            {
+                if(text[i] == '"')
+                    delimitersMet++;
+                else if(text[i] == delimiter && (delimitersMet % 2 == 0))
+                {
+                    list.Add(text.Substring(startField, i - startField));
+                    startField = i + 1;
+                }
+            }
+            list.Add(text.Substring(startField));
+            return list.ToArray();
+        }
+
         private void loadStatement()
         {
             int accountID = 0;
@@ -284,7 +303,7 @@ namespace Home_Accounting
                         {
                             if (char.IsDigit(line[0]))
                             {
-                                string[] fields = line.Split(';');
+                                string[] fields = splitToFields(line, ';');
 
                                 Transaction transaction = new Transaction();
                                 transaction.date = DateTime.Parse(fields[0]);
