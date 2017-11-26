@@ -192,7 +192,7 @@ namespace Home_Accounting
                 }
                 else if(dialog.FileName.EndsWith(".csv")) 
                 {
-                    if (dialog.FileName.StartsWith("report")) // processing russian standard
+                    if (Path.GetFileName(dialog.FileName).StartsWith("report")) // processing russian standard
                     {
                         accountID = 13;
 
