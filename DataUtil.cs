@@ -114,5 +114,17 @@ namespace Home_Accounting
         //        commandCommit.ExecuteNonQuery();
         //    }
         //}
+
+        /// <summary>
+        /// Generates current date/time with zeroed milliseconds (required by Jet Database to be saved into DBTimeStamp data type) 
+        /// </summary>
+        public static DateTime Now
+        {
+            get
+            {
+                DateTime now = DateTime.Now;
+                return new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second);
+            }
+        }
     }
 }

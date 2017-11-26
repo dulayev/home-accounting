@@ -37,8 +37,9 @@ namespace Home_Accounting
                     decimal srcAmount = decimal.Parse(textBoxSrcAmount.Text);
                     decimal dstAmount = decimal.Parse(textBoxDstAmount.Text);
 
-                    srcAccount.IncreaseBalance(-srcAmount);
-                    dstAccount.IncreaseBalance(dstAmount);
+                    DateTime when = DataUtil.Now;
+                    srcAccount.IncreaseBalance(-srcAmount, when);
+                    dstAccount.IncreaseBalance(dstAmount, when);
 
                     OleDbCommand cmd = new OleDbCommand("INSERT INTO [Transaction] ( SourceAmount, DestinationAmount, Source, Destination, [Date] ) " +
                         "VALUES (:srcAmount, :dstAmount, :srcID, :dstID, Now())", DataUtil.Connection);

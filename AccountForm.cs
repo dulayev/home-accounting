@@ -150,14 +150,14 @@ namespace Home_Accounting
                             cmd.Parameters["id"].Value = dataRow["id"];
                             cmd.ExecuteNonQuery();
                         }
-                        IncreaseBalance((decimal)dataRow["Amount"]);
+                        IncreaseBalance((decimal)dataRow["Amount"], DataUtil.Now);
                     }
                     debtForm.ReloadDebts();
                 }
             }
         }
 
-        public void IncreaseBalance(decimal amount)
+        public void IncreaseBalance(decimal amount, DateTime when, bool debitChecked = false)
         {
             OleDbCommand cmd = new OleDbCommand("update Account Set Balance = Balance + :amount where ID = :ID", DataUtil.Connection);
             cmd.Parameters.AddWithValue("amount", amount);
@@ -167,10 +167,13 @@ namespace Home_Accounting
             if (!Cash)
             {
                 cmd.Parameters.Clear();
-                cmd.CommandText = "INSERT INTO [BankAccountDebit] (AccountID, Amount, [When]) " +
-                        "VALUES (:accountID, :amount, Now())";
+                cmd.CommandText = "INSERT INTO [BankAccountDebit] (AccountID, Amount, [When], Checked) " +
+                        "VALUES (:accountID, :amount, :when, :checked)";
                 cmd.Parameters.AddWithValue("accountID", ID);
                 cmd.Parameters.AddWithValue("amount", -amount);
+                cmd.Parameters.AddWithValue("when", when);
+                cmd.Parameters.AddWithValue("checked", debitChecked);
+
                 cmd.ExecuteNonQuery();
             }
 

@@ -16,6 +16,7 @@ namespace Home_Accounting
         DataTable otherPurchaces = null;
         DataTable computingTable = new DataTable();
         CategoryPicker categoryPicker = new CategoryPicker();
+        bool debitChecked = false;
 
         public PurchaseForm(AccountForm accountForm)
         {
@@ -25,6 +26,40 @@ namespace Home_Accounting
 
             label1.Text = string.Format(label1.Text, accountForm.Text);
             labelCurrency.Text = accountForm.Currency;
+
+            dateTimePicker1.Value = DataUtil.Now;
+        }
+
+        public bool DebitChecked
+        {
+            set
+            {
+                debitChecked = value;
+            }
+        }
+
+        public string Amount
+        {
+            set
+            {
+                textBoxAmount.Text = value;
+            }
+        }
+
+        public string Description
+        {
+            set
+            {
+                textBoxDescription.Text = value;
+            }
+        }
+
+        public DateTime When
+        {
+            set
+            {
+                this.dateTimePicker1.Value = value;
+            }
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -110,16 +145,19 @@ namespace Home_Accounting
             {
                 try
                 {
-                    object ooo = computingTable.Compute(this.textBox1.Text, null);
-                    decimal amount = Convert.ToDecimal(ooo);;
-                    accountForm.IncreaseBalance(-amount);
+                    DateTime when = dateTimePicker1.Value;
+
+                    object ooo = computingTable.Compute(this.textBoxAmount.Text, null);
+                    decimal amount = Convert.ToDecimal(ooo);
+                    accountForm.IncreaseBalance(-amount, when, true);
 
                     OleDbCommand cmd = new OleDbCommand("INSERT INTO [Purchase] ( Account, Amount, Category, Name, [Date] ) " +
-                        "VALUES (:account, :amount, :category, :name, Now())", DataUtil.Connection);
+                        "VALUES (:account, :amount, :category, :name, :when)", DataUtil.Connection);
                     cmd.Parameters.AddWithValue("account", accountForm.ID);
                     cmd.Parameters.Add("amount", OleDbType.Currency);
                     cmd.Parameters.Add("category", OleDbType.Integer);
                     cmd.Parameters.Add("name", OleDbType.VarWChar);
+                    cmd.Parameters.AddWithValue("when", when);
 
                     foreach (DataRow dr in otherPurchaces.Rows)
                     {
@@ -130,7 +168,7 @@ namespace Home_Accounting
                     }
 
                     cmd.Parameters["amount"].Value = amount;
-                    cmd.Parameters["name"].Value = textBox3.Text;
+                    cmd.Parameters["name"].Value = textBoxDescription.Text;
                     cmd.Parameters["category"].Value = categoryID;
                     cmd.ExecuteNonQuery();
 
@@ -141,6 +179,13 @@ namespace Home_Accounting
                     e.Cancel = true;
                 }
             }
+        }
+
+        private void textBoxDescription_TextChanged(object sender, EventArgs e)
+        {
+            errorProvider1.SetError(textBoxDescription,
+                textBoxDescription.TextLength > 50 ?
+                string.Format("{0} extra symbols", textBoxDescription.TextLength - 50) : string.Empty);
         }
     }
 }

@@ -29,16 +29,18 @@ namespace Home_Accounting
                 try
                 {
                     decimal amount = decimal.Parse(textBox2.Text);
+                    DateTime when = DataUtil.Now;
 
                     string sql = "INSERT INTO Debt (Name, Lend, Plan, Amount) " +
-                        "VALUES (:name, Now(), :plan, :amount)";
+                        "VALUES (:name, :when, :plan, :amount)";
                     OleDbCommand cmd = new OleDbCommand(sql, DataUtil.Connection);
                     cmd.Parameters.AddWithValue("name", textBox1.Text);
+                    cmd.Parameters.AddWithValue("when", when);
                     cmd.Parameters.AddWithValue("plan", monthCalendar1.SelectionStart);
                     cmd.Parameters.AddWithValue("amount", amount);
                     cmd.ExecuteNonQuery();
 
-                    accountForm.IncreaseBalance(-amount);
+                    accountForm.IncreaseBalance(-amount, when);
                     debtForm.ReloadDebts();
                 }
                 catch (Exception ex)
