@@ -17,6 +17,7 @@ namespace Home_Accounting
                 CreateColumn(tableName, "Currency", "TEXT(3)");
             }
             RenameColumn("Transaction", "Amount", "SourceAmount;DestinationAmount", "CURRENCY");
+            AssureColumnSize("Purchase", "Name", "TEXT", 100);
         }
         private static void CreateColumn(string tableName, string columnName, string type)
         {
@@ -57,6 +58,33 @@ namespace Home_Accounting
             string filter = string.Format("TABLE_NAME='{0}' AND COLUMN_NAME='{1}'", tableName, columnName);
             DataRow[] result = Connection.GetSchema("COLUMNS").Select(filter);
             return result.Length > 0;
+        }
+        public static long GetColumnSize(string tableName, string columnName)
+        {
+            return GetColumnInfo(tableName, columnName).Field<long>("CHARACTER_MAXIMUM_LENGTH");
+        }
+        private static DataRow GetColumnInfo(string tableName, string columnName)
+        {
+            string filter = string.Format("TABLE_NAME='{0}' AND COLUMN_NAME='{1}'", tableName, columnName);
+            DataRow[] result = Connection.GetSchema("COLUMNS").Select(filter);
+            if (result.Length == 1)
+            {
+                return result[0];
+            }
+            else
+                throw new Exception(string.Format("Cannot find only {0}.{1} database column", tableName, columnName));
+        }
+        private static void AssureColumnSize(string tableName, string columnName, string dataType, int newSize)
+        {
+            long columnSize = GetColumnSize(tableName, columnName);
+
+            if (columnSize < newSize)
+            {
+                OleDbCommand command = Connection.CreateCommand();
+                command.CommandText = string.Format("ALTER TABLE [{0}] ALTER COLUMN [{1}] {2}({3})",
+                    tableName, columnName, dataType, newSize);
+                command.ExecuteNonQuery();
+            }
         }
         private static void AddCurrencyColumns()
         {
