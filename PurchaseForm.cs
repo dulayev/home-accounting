@@ -188,11 +188,13 @@ namespace Home_Accounting
             }
         }
 
+        private long textMaxLength = DataUtil.GetColumnSize("Purchase", "Name");
+
         private void textBoxDescription_TextChanged(object sender, EventArgs e)
         {
             errorProvider1.SetError(textBoxDescription,
-                textBoxDescription.TextLength > 50 ?
-                string.Format("{0} extra symbols", textBoxDescription.TextLength - 50) : string.Empty);
+                textBoxDescription.TextLength > textMaxLength ?
+                string.Format("{0} extra symbols", textBoxDescription.TextLength - textMaxLength) : string.Empty);
         }
     }
 }
