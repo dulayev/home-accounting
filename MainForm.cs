@@ -14,6 +14,7 @@ using System.Configuration;
 using System.Data.Common;
 using System.Xml;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 namespace Home_Accounting
 {
@@ -143,108 +144,157 @@ namespace Home_Accounting
             return description;
         }
 
-        private void importToolStripMenuItem_Click(bool check)
+        struct Transaction
         {
-            int accountID = 12;
+            public DateTime date;
+            public string description;
+            public Decimal amount;
+            public string sourceText;
+        };
+
+        private void loadStatement()
+        {
+            int accountID = 0;
+
+            List<Transaction> transactions = new List<Transaction>();
 
             OpenFileDialog dialog = new OpenFileDialog();
-            //dialog.Filter = "*.xml";
             if (dialog.ShowDialog(this) == DialogResult.OK)
             {
-                // processing citibank
-                
-                //Stream stream = dialog.OpenFile();
-                string contents = System.IO.File.ReadAllText(dialog.FileName, Encoding.Default);
-                //Xml
-
-                string unresolvedOperations = "";
-                //XmlTextReader textReader = new XmlTextReader(stream);
-                //textReader
-
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(contents);
-                //XmlReaderSettings settings = new XmlReaderSettings();
-                //XmlReader reader = XmlReader.Create(stream, settings);
-                XmlNodeList elements = doc.SelectNodes("Transactions/Transaction");
-                for(int i = elements.Count - 1; i >= 0; i--)
+                if (dialog.FileName.EndsWith(".xml")) // processing citibank
                 {
-                    XmlElement element = elements[i] as XmlElement;
-                    DateTime date = DateTime.Parse(element["date"].InnerText);
-                    string description = element["description"].InnerText;
-                    Decimal amount = Decimal.Parse(element["amount"].InnerText);
-                    //"account_number"
-                    //"40817810430017806653"
-
-                    bool found = false;
-
-                    if (check)
+                    accountID = 12;
+                    string contents = System.IO.File.ReadAllText(dialog.FileName, Encoding.Default);
+                    XmlDocument doc = new XmlDocument();
+                    doc.LoadXml(contents);
+                    XmlNodeList elements = doc.SelectNodes("Transactions/Transaction");
+                    for(int i = elements.Count - 1; i >= 0; i--)
                     {
-                        OleDbCommand cmd = DataUtil.Connection.CreateCommand();
-                        cmd.CommandText = string.Format("select ID from BankAccountDebit where AccountID = {0} and Amount = {1} and Checked = false order by [When] asc", accountID, -amount);
-                        object transactionID = cmd.ExecuteScalar();
-                        if (transactionID != null)
+                        Transaction transaction = new Transaction();
+
+                        XmlElement element = elements[i] as XmlElement;
+                        transaction.date = DateTime.Parse(element["date"].InnerText);
+                        transaction.description = element["description"].InnerText;
+                        transaction.amount = Decimal.Parse(element["amount"].InnerText);
+                        transaction.sourceText = element.OuterXml;
+
+                        transactions.Add(transaction);
+                    }
+                }
+                else if(dialog.FileName.EndsWith(".csv")) // processing citibank
+                {
+                    accountID = 13;
+
+                    // read csv into list
+                    string[] lines = System.IO.File.ReadAllLines(dialog.FileName, Encoding.Default);
+                    string[] headerFields = lines[0].Split(',');
+                    int typeIndex = Array.IndexOf(headerFields, "type");
+                    Trace.Assert(typeIndex >= 0);
+                    int amountIndex = Array.IndexOf(headerFields, "amount");
+                    Trace.Assert(amountIndex >= 0);
+                    int descriptionIndex = Array.IndexOf(headerFields, "description");
+                    Trace.Assert(descriptionIndex >= 0);
+                    int timeIndex = Array.IndexOf(headerFields, "timestamp");
+                    Trace.Assert(timeIndex >= 0);
+
+                    for(int i = 1; i < lines.Length; i++) // ignore first line - header
+                    {
+                        string line = lines[i];
+                        string[] fields = line.Split(',');
+
+                        Transaction transaction = new Transaction();
+                        int type = int.Parse(fields[typeIndex]);
+                        transaction.date = DateTime.Parse(fields[timeIndex]);
+                        transaction.description = fields[descriptionIndex];
+                        Decimal amount = Decimal.Parse(fields[amountIndex]);
+                        if(type == 0)
                         {
-                            found = true;
-                            OleDbCommand cmdUpdate = DataUtil.Connection.CreateCommand();
-                            cmdUpdate.CommandText = "update BankAccountDebit set Checked = True where ID = " + transactionID.ToString();
-                            cmdUpdate.ExecuteNonQuery();
+                            amount = -amount;
+                        }
+                        transaction.amount = amount;
+                        transaction.sourceText = line;
+
+                        transactions.Add(transaction);
+                    }
+                }
+
+                if(accountID == 0)
+                {
+                    MessageBox.Show(dialog.FileName + " is unknown");
+                }
+                else
+                {
+                    importStatement(transactions, accountID);
+                }
+            }
+        }
+
+        private void importStatement(List<Transaction> transactions, int accountID)
+        {
+            string unresolvedOperations = "";
+
+            foreach(Transaction transaction in transactions)
+            {
+                bool found = false;
+
+                OleDbCommand cmd = DataUtil.Connection.CreateCommand();
+                cmd.CommandText = string.Format("select ID from BankAccountDebit where AccountID = {0} and Amount = {1} and Checked = false order by [When] asc", accountID, -transaction.amount);
+                object transactionID = cmd.ExecuteScalar();
+                if (transactionID != null)
+                {
+                    found = true;
+                    OleDbCommand cmdUpdate = DataUtil.Connection.CreateCommand();
+                    cmdUpdate.CommandText = "update BankAccountDebit set Checked = True where ID = " + transactionID.ToString();
+                    cmdUpdate.ExecuteNonQuery();
+                }
+
+                if (!found)
+                {
+                    bool recognized = false;
+                    /*
+                    string[] operationSigns = { "ПОКУПКА ПО КАРТЕ", "ЗАРАБОТНАЯ ПЛАТА", "ALERTING КОМИССИЯ", "ПРОЦЕНТ ПО ДЕПОЗИТУ", "ЭЛЕКТРОННЫЙ ПЛАТЕЖ", "ОПЛАТА УСЛУГ" };
+                    foreach(string operationSign in operationSigns)
+                    {
+                        if(transaction.description.StartsWith(operationSign))
+                        {
+                            recognized = true;
+                            break;
+                        }
+                    }*/
+                    recognized = true;
+
+                    if (recognized)
+                    {
+                        AccountForm accountForm = GetAccountForm(accountID);
+                        PurchaseForm purchaseForm = new PurchaseForm(accountForm);
+
+                        purchaseForm.Amount = (-transaction.amount).ToString();
+                        purchaseForm.Description = packDescription(transaction.description);
+                        purchaseForm.When = transaction.date;
+                        purchaseForm.DebitChecked = true;
+
+                        if (purchaseForm.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
+                        {
+                            recognized = false;
                         }
                     }
-
-                    if (!found)
-                    {
-                        string[] operationSigns = { "ПОКУПКА ПО КАРТЕ", "ЗАРАБОТНАЯ ПЛАТА", "ALERTING КОМИССИЯ", "ПРОЦЕНТ ПО ДЕПОЗИТУ", "ЭЛЕКТРОННЫЙ ПЛАТЕЖ", "ОПЛАТА УСЛУГ" };
-                        bool recognized = false;
-                        int retainFirstCharsLen = 0;
-                        foreach(string operationSign in operationSigns)
-                        {
-                            if(description.StartsWith(operationSign))
-                            {
-                                recognized = true;
-                                retainFirstCharsLen = operationSign.Length;
-                                break;
-                            }
-                        }
-
-                        if (recognized)
-                        {
-                            AccountForm accountForm = GetAccountForm(accountID);
-                            PurchaseForm purchaseForm = new PurchaseForm(accountForm);
-
-                            purchaseForm.Amount = (-amount).ToString();
-                            purchaseForm.Description = packDescription(description);
-                            purchaseForm.When = date;
-                            purchaseForm.DebitChecked = true;
-
-                            if (purchaseForm.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
-                            {
-                                recognized = false;
-                            }
-                        }
                         
-                        if(!recognized)
-                        {
-                            unresolvedOperations += element.OuterXml;
-                            unresolvedOperations += "\r\n";
-                        }
+                    if(!recognized)
+                    {
+                        unresolvedOperations += transaction.sourceText;
+                        unresolvedOperations += "\r\n";
                     }
                 }
-
-                if (unresolvedOperations.Length != 0)
-                {
-                    MessageBox.Show(unresolvedOperations, "Unresolved Operations");
-                }
+            }
+            if (unresolvedOperations.Length != 0)
+            {
+                MessageBox.Show(unresolvedOperations, "Unresolved Operations");
             }
         }
 
         private void checkToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            importToolStripMenuItem_Click(true);
-        }
-
-        private void fillToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            importToolStripMenuItem_Click(false);
+            loadStatement();
         }
     }
 }

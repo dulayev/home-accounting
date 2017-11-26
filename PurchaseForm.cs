@@ -149,7 +149,7 @@ namespace Home_Accounting
 
                     object ooo = computingTable.Compute(this.textBoxAmount.Text, null);
                     decimal amount = Convert.ToDecimal(ooo);
-                    accountForm.IncreaseBalance(-amount, when, true);
+                    accountForm.IncreaseBalance(-amount, when, debitChecked);
 
                     OleDbCommand cmd = new OleDbCommand("INSERT INTO [Purchase] ( Account, Amount, Category, Name, [Date] ) " +
                         "VALUES (:account, :amount, :category, :name, :when)", DataUtil.Connection);
