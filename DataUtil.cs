@@ -18,6 +18,18 @@ namespace Home_Accounting
             }
             RenameColumn("Transaction", "Amount", "SourceAmount;DestinationAmount", "CURRENCY");
             AssureColumnSize("Purchase", "Name", "TEXT", 100);
+            CreateColumnWithDefault("Account", "Active", "BIT", 1);
+        }
+        private static void CreateColumnWithDefault(string tableName, string columnName, string type, object defaultValue)
+        {
+            if (!ColumnExists(tableName, columnName))
+            {
+                OleDbCommand cmd = Connection.CreateCommand();
+                cmd.CommandText = string.Format("ALTER TABLE [{0}] ADD COLUMN [{1}] {2} DEFAULT {3}", tableName, columnName, type, defaultValue);
+                cmd.ExecuteNonQuery();
+                cmd.CommandText = string.Format("UPDATE [{0}] SET [{1}] = {2}", tableName, columnName, defaultValue);
+                cmd.ExecuteNonQuery();
+            }
         }
         private static void CreateColumn(string tableName, string columnName, string type)
         {

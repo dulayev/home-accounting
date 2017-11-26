@@ -58,7 +58,7 @@ namespace Home_Accounting
                 Application.Exit();
             }
 
-            string selectCmdText = "SELECT Account.* FROM         Account";
+            string selectCmdText = "SELECT Account.* FROM         Account WHERE Active <> 0";
             OleDbDataAdapter adapter = new OleDbDataAdapter(selectCmdText, connection);
             DataTable tableAccounts = new DataTable();
             adapter.Fill(tableAccounts);
