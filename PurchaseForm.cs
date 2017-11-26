@@ -24,6 +24,7 @@ namespace Home_Accounting
             this.accountForm = accountForm;
 
             label1.Text = string.Format(label1.Text, accountForm.Text);
+            labelCurrency.Text = accountForm.Currency;
         }
 
         private void button3_Click(object sender, EventArgs e)

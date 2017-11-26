@@ -32,6 +32,7 @@ namespace Home_Accounting
             this.buttonCheck = new System.Windows.Forms.Button();
             this.labelCheck = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.labelCurrency = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -54,7 +55,7 @@ namespace Home_Accounting
             // buttonCheck
             // 
             this.buttonCheck.Location = new System.Drawing.Point(247, 46);
-            this.buttonCheck.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonCheck.Margin = new System.Windows.Forms.Padding(4);
             this.buttonCheck.Name = "buttonCheck";
             this.buttonCheck.Size = new System.Drawing.Size(80, 28);
             this.buttonCheck.TabIndex = 1;
@@ -76,7 +77,7 @@ namespace Home_Accounting
             // 
             this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Left;
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(177, 107);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
@@ -85,6 +86,16 @@ namespace Home_Accounting
             this.pictureBox1.DragDrop += new System.Windows.Forms.DragEventHandler(this.AccountForm_DragDrop);
             this.pictureBox1.DragOver += new System.Windows.Forms.DragEventHandler(this.AccountForm_DragOver);
             this.pictureBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.AccountForm_MouseDown);
+            // 
+            // labelCurrency
+            // 
+            this.labelCurrency.Location = new System.Drawing.Point(181, 46);
+            this.labelCurrency.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.labelCurrency.Name = "labelCurrency";
+            this.labelCurrency.Size = new System.Drawing.Size(58, 28);
+            this.labelCurrency.TabIndex = 2;
+            this.labelCurrency.Text = "label1";
+            this.labelCurrency.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // AccountForm
             // 
@@ -97,11 +108,12 @@ namespace Home_Accounting
             this.ClientSize = new System.Drawing.Size(395, 107);
             this.ControlBox = false;
             this.Controls.Add(this.pictureBox1);
+            this.Controls.Add(this.labelCurrency);
             this.Controls.Add(this.labelCheck);
             this.Controls.Add(this.buttonCheck);
             this.Controls.Add(this.labelBalance);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "AccountForm";
             this.Text = "AccountForm";
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.AccountForm_DragDrop);
@@ -118,5 +130,6 @@ namespace Home_Accounting
         private System.Windows.Forms.Button buttonCheck;
         private System.Windows.Forms.Label labelCheck;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Label labelCurrency;
     }
 }

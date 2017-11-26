@@ -23,6 +23,9 @@ namespace Home_Accounting
 
             labelSrc.Text = srcAccount.Text;
             labelDst.Text = dstAccount.Text;
+
+            bool sameCurrency = srcAccount.Currency.Equals(dstAccount.Currency);
+            textBoxDstAmount.ReadOnly = sameCurrency;
         }
 
         private void TransactionForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -31,14 +34,16 @@ namespace Home_Accounting
             {
                 try
                 {
-                    decimal amount = decimal.Parse(textBox1.Text);
+                    decimal srcAmount = decimal.Parse(textBoxSrcAmount.Text);
+                    decimal dstAmount = decimal.Parse(textBoxDstAmount.Text);
 
-                    srcAccount.IncreaseBalance(-amount);
-                    dstAccount.IncreaseBalance(amount);
+                    srcAccount.IncreaseBalance(-srcAmount);
+                    dstAccount.IncreaseBalance(dstAmount);
 
-                    OleDbCommand cmd = new OleDbCommand("INSERT INTO [Transaction] ( Amount, Source, Destination, [Date] ) " +
-                        "VALUES (:amount, :srcID, :dstID, Now())", DataUtil.Connection);
-                    cmd.Parameters.AddWithValue("amount", amount);
+                    OleDbCommand cmd = new OleDbCommand("INSERT INTO [Transaction] ( SourceAmount, DestinationAmount, Source, Destination, [Date] ) " +
+                        "VALUES (:srcAmount, :dstAmount, :srcID, :dstID, Now())", DataUtil.Connection);
+                    cmd.Parameters.AddWithValue("srcAmount", srcAmount);
+                    cmd.Parameters.AddWithValue("dstAmount", dstAmount);
                     cmd.Parameters.AddWithValue("srcID", srcAccount.ID);
                     cmd.Parameters.AddWithValue("dstID", dstAccount.ID);
                     cmd.ExecuteNonQuery();
@@ -51,5 +56,34 @@ namespace Home_Accounting
             }
         }
 
+        private void textBoxSrcAmount_TextChanged(object sender, EventArgs e)
+        {
+            if (textBoxDstAmount.ReadOnly)
+            {
+                textBoxDstAmount.Text = textBoxSrcAmount.Text;
+            }
+            UpdateRate();
+        }
+
+        private void textBoxDstAmount_TextChanged(object sender, EventArgs e)
+        {
+            UpdateRate();
+        }
+
+        private void UpdateRate()
+        {
+            try
+            {
+                decimal srcAmount = decimal.Parse(textBoxSrcAmount.Text);
+                decimal dstAmount = decimal.Parse(textBoxDstAmount.Text);
+                decimal min = Math.Min(srcAmount, dstAmount);
+                decimal max = Math.Max(srcAmount, dstAmount);
+                labelRate.Text = (max / min).ToString();
+            }
+            catch
+            {
+                labelRate.Text = "?";
+            }
+        }
     }
 }

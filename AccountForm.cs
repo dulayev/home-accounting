@@ -17,6 +17,16 @@ namespace Home_Accounting
 
         public int ID;
         public bool Cash;
+        private string currency;
+        public string Currency
+        {
+            get { return currency; }
+            set
+            {
+                currency = value;
+                labelCurrency.Text = currency;
+            }
+        }
 
         private decimal balance;
         public decimal Balance
@@ -44,7 +54,7 @@ namespace Home_Accounting
 
         private void ReloadData()
         {
-            OleDbCommand cmd = new OleDbCommand("select Name, Balance, Cash from [Account] where ID = :id", DataUtil.Connection);
+            OleDbCommand cmd = new OleDbCommand("select Name, Balance, Cash, [Currency] from [Account] where ID = :id", DataUtil.Connection);
             cmd.Parameters.AddWithValue("id", ID);
 
             OleDbDataReader reader = cmd.ExecuteReader();
@@ -53,6 +63,7 @@ namespace Home_Accounting
                 Text = (string)reader["Name"];
                 Balance = (decimal)reader["Balance"];
                 Cash = (bool)reader["Cash"];
+                Currency = reader["Currency"].ToString();
             }
             reader.Close();
 

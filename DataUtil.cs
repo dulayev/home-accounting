@@ -2,12 +2,75 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Data.OleDb;
+using System.Data;
 
 namespace Home_Accounting
 {
     class DataUtil
     {
         private static OleDbConnection connection = null;
+
+        public static void UpgradeDatabase()
+        {
+            foreach (string tableName in new string[] { "Account", "Debt" })
+            {
+                CreateColumn(tableName, "Currency", "TEXT(3)");
+            }
+            RenameColumn("Transaction", "Amount", "SourceAmount;DestinationAmount", "CURRENCY");
+        }
+        private static void CreateColumn(string tableName, string columnName, string type)
+        {
+            if(!ColumnExists(tableName, columnName))
+            {
+                string sql = string.Format("ALTER TABLE [{0}] ADD COLUMN [{1}] TEXT(3)", tableName, columnName);
+                new OleDbCommand(sql, Connection).ExecuteNonQuery();
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="fromColumnName"></param>
+        /// <param name="toColumnsName">here could be list of columns delemitied with ;</param>
+        /// <param name="type"></param>
+        private static void RenameColumn(string tableName, string fromColumnName, string toColumnsName, string type)
+        {
+            OleDbCommand command = Connection.CreateCommand();
+            if (ColumnExists(tableName, fromColumnName))
+            {
+                foreach (string toColumnName in toColumnsName.Split(';'))
+                {
+                    if (!ColumnExists(tableName, toColumnName))
+                    {
+                        command.CommandText = string.Format("ALTER TABLE [{0}] ADD COLUMN [{1}] {2}", tableName, toColumnName, type);
+                        command.ExecuteNonQuery();
+                        command.CommandText = string.Format("UPDATE [{0}] SET [{1}] = [{2}]", tableName, toColumnName, fromColumnName);
+                        command.ExecuteNonQuery();
+                    }
+                }
+                command.CommandText = string.Format("ALTER TABLE [{0}] DROP COLUMN [{1}]", tableName, fromColumnName);
+                command.ExecuteNonQuery();
+            }
+        }
+        private static bool ColumnExists(string tableName, string columnName)
+        {
+            string filter = string.Format("TABLE_NAME='{0}' AND COLUMN_NAME='{1}'", tableName, columnName);
+            DataRow[] result = Connection.GetSchema("COLUMNS").Select(filter);
+            return result.Length > 0;
+        }
+        private static void AddCurrencyColumns()
+        {
+            string[] tableNames = { "Account", "Debt" };
+            foreach (string tableName in tableNames)
+            {
+                string columnName = "Currency";
+                string filter = string.Format("TABLE_NAME='{0}' AND COLUMN_NAME='{1}'", tableName, columnName);
+                DataRow[] result = Connection.GetSchema("COLUMNS").Select(filter);
+                if (result.Length == 0)
+                {
+                }
+            }
+        }
 
         //private static OleDbCommand commandStart;
         //private static OleDbCommand commandCommit;

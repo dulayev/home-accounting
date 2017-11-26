@@ -47,6 +47,7 @@ namespace Home_Accounting
             {
                 connection.Open();
                 DataUtil.Connection = connection;
+                DataUtil.UpgradeDatabase();
             }
             catch(Exception ex)
             {
