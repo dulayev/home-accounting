@@ -40,21 +40,23 @@ namespace Home_Accounting
             this.labelBalance.AllowDrop = true;
             this.labelBalance.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.labelBalance.ForeColor = System.Drawing.Color.Red;
-            this.labelBalance.Location = new System.Drawing.Point(132, 0);
+            this.labelBalance.Location = new System.Drawing.Point(176, 0);
+            this.labelBalance.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelBalance.Name = "labelBalance";
-            this.labelBalance.Size = new System.Drawing.Size(164, 34);
+            this.labelBalance.Size = new System.Drawing.Size(219, 42);
             this.labelBalance.TabIndex = 0;
             this.labelBalance.Text = "100";
             this.labelBalance.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.labelBalance.DragDrop += new System.Windows.Forms.DragEventHandler(this.AccountForm_DragDrop);
             this.labelBalance.DragOver += new System.Windows.Forms.DragEventHandler(this.AccountForm_DragOver);
             this.labelBalance.MouseDown += new System.Windows.Forms.MouseEventHandler(this.AccountForm_MouseDown);
-            this.labelBalance.DragDrop += new System.Windows.Forms.DragEventHandler(this.AccountForm_DragDrop);
             // 
             // buttonCheck
             // 
-            this.buttonCheck.Location = new System.Drawing.Point(185, 37);
+            this.buttonCheck.Location = new System.Drawing.Point(247, 46);
+            this.buttonCheck.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonCheck.Name = "buttonCheck";
-            this.buttonCheck.Size = new System.Drawing.Size(60, 23);
+            this.buttonCheck.Size = new System.Drawing.Size(80, 28);
             this.buttonCheck.TabIndex = 1;
             this.buttonCheck.Text = "Сверить";
             this.buttonCheck.UseVisualStyleBackColor = true;
@@ -62,9 +64,10 @@ namespace Home_Accounting
             // 
             // labelCheck
             // 
-            this.labelCheck.Location = new System.Drawing.Point(136, 63);
+            this.labelCheck.Location = new System.Drawing.Point(181, 78);
+            this.labelCheck.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelCheck.Name = "labelCheck";
-            this.labelCheck.Size = new System.Drawing.Size(160, 23);
+            this.labelCheck.Size = new System.Drawing.Size(213, 28);
             this.labelCheck.TabIndex = 2;
             this.labelCheck.Text = "label1";
             this.labelCheck.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -73,29 +76,32 @@ namespace Home_Accounting
             // 
             this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Left;
             this.pictureBox1.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(133, 87);
+            this.pictureBox1.Size = new System.Drawing.Size(177, 107);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 3;
             this.pictureBox1.TabStop = false;
+            this.pictureBox1.DragDrop += new System.Windows.Forms.DragEventHandler(this.AccountForm_DragDrop);
             this.pictureBox1.DragOver += new System.Windows.Forms.DragEventHandler(this.AccountForm_DragOver);
             this.pictureBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.AccountForm_MouseDown);
-            this.pictureBox1.DragDrop += new System.Windows.Forms.DragEventHandler(this.AccountForm_DragDrop);
             // 
             // AccountForm
             // 
             this.AllowDrop = true;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSize = true;
             this.BackColor = System.Drawing.Color.Pink;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.ClientSize = new System.Drawing.Size(296, 87);
+            this.ClientSize = new System.Drawing.Size(395, 107);
             this.ControlBox = false;
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.labelCheck);
             this.Controls.Add(this.buttonCheck);
             this.Controls.Add(this.labelBalance);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "AccountForm";
             this.Text = "AccountForm";
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.AccountForm_DragDrop);
