@@ -299,8 +299,10 @@ namespace Home_Accounting
 
                         // read csv into list
                         string[] lines = System.IO.File.ReadAllLines(dialog.FileName, Encoding.Default);
-                        foreach (string line in lines)
+                        for (int i = lines.Length - 1; i >= 0; --i)
                         {
+                            string line = lines[i];
+
                             if (char.IsDigit(line[0]))
                             {
                                 string[] fields = splitToFields(line, ';');
