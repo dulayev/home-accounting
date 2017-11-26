@@ -52,9 +52,9 @@ namespace Home_Accounting
             ReloadData();
         }
 
-        private void ReloadData()
+        public void ReloadData()
         {
-            OleDbCommand cmd = new OleDbCommand("select Name, Balance, Cash, [Currency] from [Account] where ID = :id", DataUtil.Connection);
+            OleDbCommand cmd = DataUtil.CreateCommand("select Name, Balance, Cash, [Currency] from [Account] where ID = :id");
             cmd.Parameters.AddWithValue("id", ID);
 
             OleDbDataReader reader = cmd.ExecuteReader();
@@ -67,7 +67,7 @@ namespace Home_Accounting
             }
             reader.Close();
 
-            cmd = new OleDbCommand("select [When] from [AccountCheck] where AccountID = :iddd order by id desc", DataUtil.Connection);
+            cmd = DataUtil.CreateCommand("select [When] from [AccountCheck] where AccountID = :iddd order by id desc");
             cmd.Parameters.AddWithValue("iddd", ID);
             string lastCheck = "Никогда";
             reader = cmd.ExecuteReader();
@@ -159,7 +159,7 @@ namespace Home_Accounting
 
         public void IncreaseBalance(decimal amount, DateTime when, bool debitChecked = false)
         {
-            OleDbCommand cmd = new OleDbCommand("update Account Set Balance = Balance + :amount where ID = :ID", DataUtil.Connection);
+            OleDbCommand cmd = DataUtil.CreateCommand("update Account Set Balance = Balance + :amount where ID = :ID");
             cmd.Parameters.AddWithValue("amount", amount);
             cmd.Parameters.AddWithValue("ID", ID);
             cmd.ExecuteNonQuery();

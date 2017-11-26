@@ -143,6 +143,8 @@ namespace Home_Accounting
         {
             if (DialogResult == DialogResult.OK)
             {
+                DataUtil.Begin();
+
                 try
                 {
                     DateTime when = dateTimePicker1.Value;
@@ -151,8 +153,9 @@ namespace Home_Accounting
                     decimal amount = Convert.ToDecimal(ooo);
                     accountForm.IncreaseBalance(-amount, when, debitChecked);
 
-                    OleDbCommand cmd = new OleDbCommand("INSERT INTO [Purchase] ( Account, Amount, Category, Name, [Date] ) " +
-                        "VALUES (:account, :amount, :category, :name, :when)", DataUtil.Connection);
+                    OleDbCommand cmd = DataUtil.CreateCommand("INSERT INTO [Purchase] ( Account, Amount, Category, Name, [Date] ) " +
+                        "VALUES (:account, :amount, :category, :name, :when)");
+
                     cmd.Parameters.AddWithValue("account", accountForm.ID);
                     cmd.Parameters.Add("amount", OleDbType.Currency);
                     cmd.Parameters.Add("category", OleDbType.Integer);
@@ -172,9 +175,13 @@ namespace Home_Accounting
                     cmd.Parameters["category"].Value = categoryID;
                     cmd.ExecuteNonQuery();
 
+                    DataUtil.Commit();
                 }
                 catch (Exception ex)
                 {
+                    DataUtil.Rollback();
+                    accountForm.ReloadData();
+
                     MessageBox.Show(ex.Message);
                     e.Cancel = true;
                 }

@@ -92,6 +92,32 @@ namespace Home_Accounting
             }
         }
 
+        private static OleDbTransaction transaction;
+        public static OleDbTransaction Transaction
+        {
+            get { return transaction; }
+        }
+
+        public static OleDbTransaction Begin()
+        {
+            transaction = connection.BeginTransaction();
+            return transaction;
+        }
+        public static void Commit()
+        {
+            transaction.Commit();
+            transaction = null;
+        }
+        public static void Rollback()
+        {
+            transaction.Rollback();
+            transaction = null;
+        }
+
+        public static OleDbCommand CreateCommand(string commandText)
+        {
+            return new OleDbCommand(commandText, connection, transaction);
+        }
         //public class Transaction : IDisposable
         //{
         //    bool commited = false;
