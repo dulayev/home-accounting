@@ -15,6 +15,7 @@ using System.Data.Common;
 using System.Xml;
 using System.Text.RegularExpressions;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace Home_Accounting
 {
@@ -311,6 +312,33 @@ namespace Home_Accounting
                                 transaction.date = DateTime.Parse(fields[0]);
                                 transaction.description = trimSymmetric(fields[2], '\"') + " " + trimSymmetric(fields[3], '\"');
                                 transaction.amount = Decimal.Parse(fields[4]);
+                                transaction.sourceText = line;
+
+                                transactions.Add(transaction);
+                            }
+                        }
+                    }
+                    else if (Path.GetFileName(dialog.FileName).StartsWith("alfa-")) // processing Alfa
+                    {
+                        // read csv into list
+                        string[] lines = System.IO.File.ReadAllLines(dialog.FileName, Encoding.Default);
+                        bool alex_account = (null != Array.Find<string>(lines, delegate(string s) { return s.Contains("40817810704370064412"); }));
+                        accountID = alex_account ? 27 : 23;
+                        for (int i = lines.Length - 1; i >= 0; --i)
+                        {
+                            string line = lines[i];
+                            string[] fields = splitToFields(line, ';');
+
+                            NumberFormatInfo nfi = (NumberFormatInfo)CultureInfo.CurrentCulture.NumberFormat.Clone();
+                            nfi.NumberDecimalSeparator = ",";
+
+                            if (char.IsDigit(fields[1][0])) // account number is digit
+                            {
+
+                                Transaction transaction = new Transaction();
+                                transaction.date = DateTime.Parse(fields[3]);
+                                transaction.description = fields[5];
+                                transaction.amount = Decimal.Parse(fields[6], nfi) - Decimal.Parse(fields[7], nfi);
                                 transaction.sourceText = line;
 
                                 transactions.Add(transaction);
