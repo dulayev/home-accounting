@@ -250,8 +250,6 @@ namespace Home_Accounting
                     }
                     else if (Path.GetFileName(dialog.FileName).StartsWith("avangard-")) // processing avangard
                     {
-                        accountID = 17;
-
                         // read csv into list
                         string[] lines = System.IO.File.ReadAllLines(dialog.FileName, Encoding.Default);
 
@@ -268,6 +266,8 @@ namespace Home_Accounting
                             transaction.sourceText = line;
                             try
                             {
+                                // account will be determined by last line
+                                accountID = (fields[5] == "*3690") ? 26 : 17;
 
                                 transaction.date = DateTime.Parse(fields[0]);
                                 String credit = fields[1];
@@ -278,14 +278,13 @@ namespace Home_Accounting
                                 if (debit != String.Empty)
                                 {
                                     transaction.amount = -Decimal.Parse(debit);
-                                    transaction.description = String.Format("{0} {1} {2}{3} {4}", 
-                                        fields[3], fields[4], fields[6], fields[7], fields[9]);
                                 }
                                 else
                                 {
                                     transaction.amount = Decimal.Parse(credit);
-                                    transaction.description = fields[3];
                                 }
+                                transaction.description = String.Format("{0} {1} {2}{3} {4}",
+                                    fields[3], fields[4], fields[6], fields[7], fields[9]);
                             }
                             catch(Exception)
                             {
