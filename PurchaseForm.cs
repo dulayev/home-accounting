@@ -62,6 +62,14 @@ namespace Home_Accounting
             }
         }
 
+        public int CategoryID
+        {
+            set
+            {
+                this.categoryID = value;
+                button3.Text = new Category().GetFullName(value);
+            }
+        }
         private void button3_Click(object sender, EventArgs e)
         {
             CategoryPicker picker = new CategoryPicker();

@@ -13,7 +13,7 @@ namespace Home_Accounting
     {
         public int CategoryID;
         public string CategoryName;
-        static private DataTable tableCategories = null;
+        private DataTable tableCategories = null;
         //static private Dictionary<int, string> cacheIDToName = new Dictionary<int, string>();
 
         public string IDToName(int id)
@@ -88,7 +88,7 @@ namespace Home_Accounting
             }
         }
 
-        private static void LoadTableCategories()
+        private void LoadTableCategories()
         {
             if (tableCategories == null)
             {

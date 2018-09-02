@@ -24,9 +24,12 @@ namespace Home_Accounting
         public MainForm()
         {
             InitializeComponent();
+            instance = this;
         }
 
-        OleDbConnection connection; 
+        OleDbConnection connection;
+        private static MainForm instance;
+
         private void MainForm_Load(object sender, EventArgs e)
         {
             WindowState = FormWindowState.Normal;
@@ -106,6 +109,11 @@ namespace Home_Accounting
             }
         }
 
+        internal static MainForm GetInstance()
+        {
+            return instance;
+        }
+
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             Properties.Settings.Default["MainWindowRestoreBounds"] = WindowState == FormWindowState.Normal ? Bounds : RestoreBounds;
@@ -123,7 +131,7 @@ namespace Home_Accounting
             Properties.Settings.Default.Save();
         }
 
-        private AccountForm GetAccountForm(int accountID)
+        public AccountForm GetAccountForm(int accountID)
         {
             foreach(Form form in MdiChildren)
             {
@@ -422,6 +430,12 @@ namespace Home_Accounting
         private void checkToolStripMenuItem_Click(object sender, EventArgs e)
         {
             loadStatement();
+        }
+
+        private void clipboardToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            PurchaseSpreadSheet form = new PurchaseSpreadSheet();
+            form.ShowDialog(this);
         }
     }
 }
