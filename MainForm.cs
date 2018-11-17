@@ -306,10 +306,13 @@ namespace Home_Accounting
                         accountID = 19;
 
                         // read csv into list
-                        string[] lines = System.IO.File.ReadAllLines(dialog.FileName, Encoding.Default);
+                        string contents = System.IO.File.ReadAllText(dialog.FileName, Encoding.Default);
+                        string[] lines = contents.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
                         for (int i = lines.Length - 1; i >= 0; --i)
                         {
-                            string line = lines[i];
+                            // bank inserts \n to description, have to split lines on '\r\n', then delete '\n'
+                            string line = lines[i].Replace("\n", "");
+                            line = line.Replace("Покупка товара НДС не облагается.", ""); // remove useless phrase
 
                             if (char.IsDigit(line[0]))
                             {
