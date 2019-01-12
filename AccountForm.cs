@@ -135,22 +135,23 @@ namespace Home_Accounting
                     (DebtForm)e.Data.GetData(typeof(DebtForm));
                 if (debtForm != null)
                 {
-                    OleDbCommand cmd = new OleDbCommand("UPDATE Debt SET Actual = Now() WHERE ID = :id", DataUtil.Connection);
-                    cmd.Parameters.Add("id", OleDbType.Integer);
-
                     foreach (DataRow dataRow in debtForm.SelectedRows)
                     {
                         string text = string.Format("Погашение {0} от {1} в {2}?",
                             dataRow["Amount"], dataRow["Name"], this.Text);
-                        DialogResult dialogResult = MessageBox.Show(text, "Долг", MessageBoxButtons.YesNoCancel);
-                        if (dialogResult == DialogResult.Cancel)
-                            break;
-                        else if (dialogResult == DialogResult.Yes)
+
+                        DebtReturnForm returnForm = new DebtReturnForm();
+                        returnForm.Message = text;
+
+                        DialogResult dialogResult = returnForm.ShowDialog(this);
+                        if (dialogResult == DialogResult.OK)
                         {
-                            cmd.Parameters["id"].Value = dataRow["id"];
+                            OleDbCommand cmd = new OleDbCommand("UPDATE Debt SET Actual = :when WHERE ID = :id", DataUtil.Connection);
+                            cmd.Parameters.AddWithValue("when", returnForm.When);
+                            cmd.Parameters.AddWithValue("id", dataRow["id"]);
                             cmd.ExecuteNonQuery();
+                            IncreaseBalance((decimal)dataRow["Amount"], returnForm.When);
                         }
-                        IncreaseBalance((decimal)dataRow["Amount"], DataUtil.Now);
                     }
                     debtForm.ReloadDebts();
                 }

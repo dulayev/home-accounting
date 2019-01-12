@@ -114,6 +114,12 @@
     <Compile Include="DebtForm.Designer.cs">
       <DependentUpon>DebtForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="DebtReturnForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DebtReturnForm.Designer.cs">
+      <DependentUpon>DebtReturnForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Home_AccountingDataSet.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -146,6 +152,9 @@
     <EmbeddedResource Include="DebtForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>DebtForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DebtReturnForm.resx">
+      <DependentUpon>DebtReturnForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <SubType>Designer</SubType>
