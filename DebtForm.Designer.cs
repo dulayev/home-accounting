@@ -32,6 +32,7 @@ namespace Home_Accounting
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Currency = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -46,18 +47,19 @@ namespace Home_Accounting
             this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Column1,
             this.Column2,
-            this.Column3});
+            this.Column3,
+            this.Currency});
             this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridView1.Location = new System.Drawing.Point(0, 0);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.ReadOnly = true;
             this.dataGridView1.RowHeadersVisible = false;
             this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridView1.Size = new System.Drawing.Size(303, 127);
+            this.dataGridView1.Size = new System.Drawing.Size(438, 127);
             this.dataGridView1.TabIndex = 0;
             this.dataGridView1.CellMouseDown += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView1_CellMouseDown);
-            this.dataGridView1.DragOver += new System.Windows.Forms.DragEventHandler(this.DebtForm_DragOver);
             this.dataGridView1.DragDrop += new System.Windows.Forms.DragEventHandler(this.DebtForm_DragDrop);
+            this.dataGridView1.DragOver += new System.Windows.Forms.DragEventHandler(this.DebtForm_DragOver);
             // 
             // Column1
             // 
@@ -80,20 +82,27 @@ namespace Home_Accounting
             this.Column3.Name = "Column3";
             this.Column3.ReadOnly = true;
             // 
+            // Currency
+            // 
+            this.Currency.DataPropertyName = "Currency";
+            this.Currency.HeaderText = "Валюта";
+            this.Currency.Name = "Currency";
+            this.Currency.ReadOnly = true;
+            // 
             // DebtForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(303, 127);
+            this.ClientSize = new System.Drawing.Size(438, 127);
             this.ControlBox = false;
             this.Controls.Add(this.dataGridView1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Name = "DebtForm";
             this.Text = "Долги";
+            this.Load += new System.EventHandler(this.DebtForm_Load);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.DebtForm_DragDrop);
             this.DragOver += new System.Windows.Forms.DragEventHandler(this.DebtForm_DragOver);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DebtForm_MouseDown);
-            this.Load += new System.EventHandler(this.DebtForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
 
@@ -105,5 +114,6 @@ namespace Home_Accounting
         private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Currency;
     }
 }

@@ -59,7 +59,7 @@ namespace Home_Accounting
 
         internal void ReloadDebts()
         {
-            string sql = "SELECT Debt.ID, Debt.Name, Debt.Amount, Debt.Plan FROM Debt WHERE (((Debt.Actual) Is Null))";
+            string sql = "SELECT Debt.ID, Debt.Name, Debt.Amount, Debt.Plan, [Currency] FROM Debt WHERE (((Debt.Actual) Is Null))";
             OleDbCommand cmd = new OleDbCommand(sql, DataUtil.Connection);
             OleDbDataAdapter adapter = new OleDbDataAdapter(cmd);
             debtTable.Clear();
