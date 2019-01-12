@@ -63,31 +63,39 @@ namespace Home_Accounting
             // 
             // Column1
             // 
+            this.Column1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.Column1.DataPropertyName = "Name";
             this.Column1.HeaderText = "Кто";
             this.Column1.Name = "Column1";
             this.Column1.ReadOnly = true;
+            this.Column1.Width = 50;
             // 
             // Column2
             // 
+            this.Column2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.Column2.DataPropertyName = "Amount";
             this.Column2.HeaderText = "Сумма";
             this.Column2.Name = "Column2";
             this.Column2.ReadOnly = true;
+            this.Column2.Width = 66;
             // 
             // Column3
             // 
+            this.Column3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.Column3.DataPropertyName = "Plan";
             this.Column3.HeaderText = "До";
             this.Column3.Name = "Column3";
             this.Column3.ReadOnly = true;
+            this.Column3.Width = 47;
             // 
             // Currency
             // 
+            this.Currency.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.Currency.DataPropertyName = "Currency";
             this.Currency.HeaderText = "Валюта";
             this.Currency.Name = "Currency";
             this.Currency.ReadOnly = true;
+            this.Currency.Width = 70;
             // 
             // DebtForm
             // 
