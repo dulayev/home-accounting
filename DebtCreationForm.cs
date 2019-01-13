@@ -31,13 +31,14 @@ namespace Home_Accounting
                     decimal amount = decimal.Parse(textBox2.Text);
                     DateTime when = DataUtil.Now;
 
-                    string sql = "INSERT INTO Debt (Name, Lend, Plan, Amount) " +
-                        "VALUES (:name, :when, :plan, :amount)";
+                    string sql = "INSERT INTO Debt (Name, Lend, Plan, Amount, [Currency]) " +
+                        "VALUES (:name, :when, :plan, :amount, :currency)";
                     OleDbCommand cmd = new OleDbCommand(sql, DataUtil.Connection);
                     cmd.Parameters.AddWithValue("name", textBox1.Text);
                     cmd.Parameters.AddWithValue("when", when);
                     cmd.Parameters.AddWithValue("plan", monthCalendar1.SelectionStart);
                     cmd.Parameters.AddWithValue("amount", amount);
+                    cmd.Parameters.AddWithValue("currency", accountForm.Currency);
                     cmd.ExecuteNonQuery();
 
                     accountForm.IncreaseBalance(-amount, when);

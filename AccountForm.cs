@@ -137,6 +137,14 @@ namespace Home_Accounting
                 {
                     foreach (DataRow dataRow in debtForm.SelectedRows)
                     {
+                        if (!this.Currency.Equals(dataRow["Currency"].ToString()))
+                        {
+                            string message = string.Format("Currencies mismatch: [{0}] to [{1}]",
+                                dataRow["Currency"], this.Currency);
+                            MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            continue;
+                        }
+
                         string text = string.Format("Погашение {0} от {1} в {2}?",
                             dataRow["Amount"], dataRow["Name"], this.Text);
 
