@@ -120,6 +120,7 @@
     <Compile Include="DebtReturnForm.Designer.cs">
       <DependentUpon>DebtReturnForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormUtil.cs" />
     <Compile Include="Home_AccountingDataSet.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

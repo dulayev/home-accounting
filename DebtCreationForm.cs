@@ -36,7 +36,7 @@ namespace Home_Accounting
                     OleDbCommand cmd = new OleDbCommand(sql, DataUtil.Connection);
                     cmd.Parameters.AddWithValue("name", textBox1.Text);
                     cmd.Parameters.AddWithValue("when", when);
-                    cmd.Parameters.AddWithValue("plan", monthCalendar1.SelectionStart);
+                    cmd.Parameters.AddWithValue("plan", FormUtil.GetDate(monthCalendar1));
                     cmd.Parameters.AddWithValue("amount", amount);
                     cmd.Parameters.AddWithValue("currency", accountForm.Currency);
                     cmd.ExecuteNonQuery();

@@ -42,11 +42,12 @@ namespace Home_Accounting
                     dstAccount.IncreaseBalance(dstAmount, when);
 
                     OleDbCommand cmd = new OleDbCommand("INSERT INTO [Transaction] ( SourceAmount, DestinationAmount, Source, Destination, [Date] ) " +
-                        "VALUES (:srcAmount, :dstAmount, :srcID, :dstID, Now())", DataUtil.Connection);
+                        "VALUES (:srcAmount, :dstAmount, :srcID, :dstID, :when)", DataUtil.Connection);
                     cmd.Parameters.AddWithValue("srcAmount", srcAmount);
                     cmd.Parameters.AddWithValue("dstAmount", dstAmount);
                     cmd.Parameters.AddWithValue("srcID", srcAccount.ID);
                     cmd.Parameters.AddWithValue("dstID", dstAccount.ID);
+                    cmd.Parameters.AddWithValue("when", FormUtil.GetDate(monthCalendar1));
                     cmd.ExecuteNonQuery();
                 }
                 catch (Exception ex)

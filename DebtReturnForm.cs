@@ -13,12 +13,7 @@ namespace Home_Accounting
     {
         public string Message { set { label1.Text = value; } }
 
-        public DateTime When {
-            get {
-                return monthCalendar1.SelectionStart != monthCalendar1.TodayDate ?
-                    monthCalendar1.SelectionStart : DataUtil.Now;
-            }
-        }
+        public DateTime When { get { return FormUtil.GetDate(monthCalendar1); } }
 
         public DebtReturnForm()
         {
