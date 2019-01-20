@@ -35,7 +35,7 @@ namespace Home_Accounting
             WindowState = FormWindowState.Normal;
             if (Properties.Settings.Default["MainWindowRestoreBounds"] != null)
                 Bounds = Properties.Settings.Default.MainWindowRestoreBounds;
-            if(Properties.Settings.Default["MainWindowState"] != null)
+            if (Properties.Settings.Default["MainWindowState"] != null)
                 WindowState = Properties.Settings.Default.MainWindowState;
 
             foreach (Control control in Controls)
@@ -56,7 +56,7 @@ namespace Home_Accounting
                 DataUtil.Connection = connection;
                 DataUtil.UpgradeDatabase();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString());
                 Application.Exit();
@@ -83,6 +83,8 @@ namespace Home_Accounting
             debtForm.MdiParent = this;
             debtForm.Show();
 
+            CreateOperationsForm();
+
             //ReportForm reportForm = new ReportForm();
             //reportForm.MdiParent = this;
             //reportForm.Show();
@@ -107,6 +109,48 @@ namespace Home_Accounting
                 {
                 }
             }
+        }
+
+        private void CreateOperationsForm()
+        {
+            ComboBox comboAccount = new ComboBox();
+            string query = "Select ID, Name from Account where Active";
+            OleDbDataAdapter adapter = new OleDbDataAdapter(DataUtil.CreateCommand(query));
+            DataTable table = new DataTable();
+            adapter.Fill(table);
+            comboAccount.DataSource = table;
+            comboAccount.DisplayMember = "Name";
+            comboAccount.ValueMember = "ID";
+            comboAccount.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+
+            Control[] controls = new Control[] { comboAccount };
+
+            OleDbCommand cmd = new OleDbCommand(null, DataUtil.Connection);
+            QueryForm queryForm = new QueryForm(controls, cmd);
+
+            EventHandler updateQuery = (object sender, EventArgs e) =>
+            {
+                queryForm.DbCommand.CommandText = string.Format(
+                    "SELECT * FROM Purchase where Account = {0} order by Date desc",
+                    comboAccount.SelectedValue);
+                queryForm.Reload();
+            };
+
+            comboAccount.SelectedValueChanged += updateQuery;
+            // when become visible, comboAccount.SelectedValue gets value and reasonable sql could be made
+            comboAccount.VisibleChanged += updateQuery;
+
+            DataUtil.OnAccountUpdate += (int accountId) =>
+            {
+                if (comboAccount.SelectedValue.Equals(accountId))
+                {
+                    queryForm.Reload();
+                }
+            };
+
+            queryForm.Text = "Operations";
+            queryForm.MdiParent = this;
+            queryForm.Show();
         }
 
         internal static MainForm GetInstance()

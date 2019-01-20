@@ -8,6 +8,13 @@ namespace Home_Accounting
 {
     class DataUtil
     {
+        public static event Action<int> OnAccountUpdate; // Action is generic delegate without return
+
+        public static void FireAccountUpdate(int accountID)
+        {
+            OnAccountUpdate?.Invoke(accountID);
+        }
+
         private static OleDbConnection connection = null;
 
         public static void UpgradeDatabase()

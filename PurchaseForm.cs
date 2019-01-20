@@ -184,6 +184,8 @@ namespace Home_Accounting
                     cmd.ExecuteNonQuery();
 
                     DataUtil.Commit();
+
+                    DataUtil.FireAccountUpdate(accountForm.ID);
                 }
                 catch (Exception ex)
                 {
