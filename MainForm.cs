@@ -189,22 +189,6 @@ namespace Home_Accounting
             return null;
         }
 
-        private string packDescription(string description)
-        {
-            description = description.Trim();
-            Regex regex = new Regex(" +");
-            description = regex.Replace(description, " ");
-            return description;
-        }
-
-        struct Transaction
-        {
-            public DateTime date;
-            public string description;
-            public Decimal amount;
-            public string sourceText;
-        };
-
         private static string trimSymmetric(string text, char symbol)
         {
             while (text.Length >= 2 && text[0] == symbol && text[text.Length - 1] == symbol)
@@ -237,7 +221,7 @@ namespace Home_Accounting
         {
             int accountID = 0;
 
-            List<Transaction> transactions = new List<Transaction>();
+            List<Statement.Transaction> transactions = new List<Statement.Transaction>();
 
             OpenFileDialog dialog = new OpenFileDialog();
             if (dialog.ShowDialog(this) == DialogResult.OK)
@@ -251,7 +235,7 @@ namespace Home_Accounting
                     XmlNodeList elements = doc.SelectNodes("Transactions/Transaction");
                     for(int i = elements.Count - 1; i >= 0; i--)
                     {
-                        Transaction transaction = new Transaction();
+                        Statement.Transaction transaction = new Statement.Transaction();
 
                         XmlElement element = elements[i] as XmlElement;
                         transaction.date = DateTime.Parse(element["date"].InnerText);
@@ -285,7 +269,7 @@ namespace Home_Accounting
                             string line = lines[i];
                             string[] fields = line.Split(',');
 
-                            Transaction transaction = new Transaction();
+                            Statement.Transaction transaction = new Statement.Transaction();
                             int type = int.Parse(fields[typeIndex]);
                             transaction.date = DateTime.Parse(fields[timeIndex]);
                             transaction.description = fields[descriptionIndex];
@@ -314,7 +298,7 @@ namespace Home_Accounting
                                 fields[j] = fields[j].Trim('\"');
                             }
 
-                            Transaction transaction = new Transaction();
+                            Statement.Transaction transaction = new Statement.Transaction();
                             transaction.sourceText = line;
                             try
                             {
@@ -362,7 +346,7 @@ namespace Home_Accounting
                             {
                                 string[] fields = splitToFields(line, ';');
 
-                                Transaction transaction = new Transaction();
+                                Statement.Transaction transaction = new Statement.Transaction();
                                 transaction.date = DateTime.Parse(fields[0]);
                                 transaction.description = trimSymmetric(fields[2], '\"') + " " + trimSymmetric(fields[3], '\"');
                                 transaction.amount = Decimal.Parse(fields[4]);
@@ -389,7 +373,7 @@ namespace Home_Accounting
                             if (char.IsDigit(fields[1][0])) // account number is digit
                             {
 
-                                Transaction transaction = new Transaction();
+                                Statement.Transaction transaction = new Statement.Transaction();
                                 transaction.date = DateTime.Parse(fields[3]);
                                 transaction.description = fields[5];
                                 transaction.amount = Decimal.Parse(fields[6], nfi) - Decimal.Parse(fields[7], nfi);
@@ -406,71 +390,9 @@ namespace Home_Accounting
                 }
                 else
                 {
-                    importStatement(transactions, accountID);
+                    var form = new BankPurchaseSpreadSheet(transactions, accountID);
+                    form.ShowDialog(this); //TODO: make modeless
                 }
-            }
-        }
-
-        private void importStatement(List<Transaction> transactions, int accountID)
-        {
-            string unresolvedOperations = "";
-
-            foreach(Transaction transaction in transactions)
-            {
-                bool found = false;
-
-                OleDbCommand cmd = DataUtil.Connection.CreateCommand();
-                cmd.CommandText = string.Format("select ID from BankAccountDebit where AccountID = {0} and Amount = {1} and Checked = false order by [When] asc", accountID, -transaction.amount);
-                object transactionID = cmd.ExecuteScalar();
-                if (transactionID != null)
-                {
-                    found = true;
-                    OleDbCommand cmdUpdate = DataUtil.Connection.CreateCommand();
-                    cmdUpdate.CommandText = "update BankAccountDebit set Checked = True where ID = " + transactionID.ToString();
-                    cmdUpdate.ExecuteNonQuery();
-                }
-
-                if (!found)
-                {
-                    bool recognized = false;
-                    /*
-                    string[] operationSigns = { "ПОКУПКА ПО КАРТЕ", "ЗАРАБОТНАЯ ПЛАТА", "ALERTING КОМИССИЯ", "ПРОЦЕНТ ПО ДЕПОЗИТУ", "ЭЛЕКТРОННЫЙ ПЛАТЕЖ", "ОПЛАТА УСЛУГ" };
-                    foreach(string operationSign in operationSigns)
-                    {
-                        if(transaction.description.StartsWith(operationSign))
-                        {
-                            recognized = true;
-                            break;
-                        }
-                    }*/
-                    recognized = true;
-
-                    if (recognized)
-                    {
-                        AccountForm accountForm = GetAccountForm(accountID);
-                        PurchaseForm purchaseForm = new PurchaseForm(accountForm);
-
-                        purchaseForm.Amount = (-transaction.amount).ToString();
-                        purchaseForm.Description = packDescription(transaction.description);
-                        purchaseForm.When = transaction.date;
-                        purchaseForm.DebitChecked = true;
-
-                        if (purchaseForm.ShowDialog(this) != System.Windows.Forms.DialogResult.OK)
-                        {
-                            recognized = false;
-                        }
-                    }
-                        
-                    if(!recognized)
-                    {
-                        unresolvedOperations += transaction.sourceText;
-                        unresolvedOperations += "\r\n";
-                    }
-                }
-            }
-            if (unresolvedOperations.Length != 0)
-            {
-                MessageBox.Show(unresolvedOperations, "Unresolved Operations");
             }
         }
 
