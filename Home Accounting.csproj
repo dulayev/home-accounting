@@ -222,7 +222,7 @@
     <Compile Include="PurchaseSpreadSheet.Designer.cs">
       <DependentUpon>PurchaseSpreadSheet.cs</DependentUpon>
     </Compile>
-    <Compile Include="QueryForm.cs">
+    <Compile Include="GridForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ShopForm.cs">
