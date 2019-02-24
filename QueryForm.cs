@@ -13,6 +13,7 @@ namespace Home_Accounting
 
         public QueryForm(Control[] controls, OleDbCommand cmd) : base(controls)
         {
+            this.ControlBox = false;
             this.cmd = cmd;
             this.Load += new System.EventHandler(this.OnLoad);
         }

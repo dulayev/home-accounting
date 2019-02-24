@@ -11,11 +11,51 @@ using System.Windows.Forms;
 
 namespace Home_Accounting
 {
-    public partial class PurchaseSpreadSheet : Form
+    public partial class PurchaseSpreadSheet
     {
+        private System.Windows.Forms.Button buttonSave;
+        private System.Windows.Forms.ComboBox comboAccount;
+        private System.Windows.Forms.Label labelTotalExpense;
+
+        private GridForm gridForm;
+
+        private Control[] InitControls()
+        {
+            Label label = new Label();
+            label.AutoSize = true;
+            label.Text = "Account:";
+
+            buttonSave = new Button();
+            this.buttonSave.Text = "Save";
+            this.buttonSave.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.buttonSave.Click += new System.EventHandler(this.buttonSave_Click);
+
+            comboAccount = new ComboBox();
+            this.comboAccount.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+
+            labelTotalExpense = new Label();
+            labelTotalExpense.AutoSize = true;
+            labelTotalExpense.Text = "RUB: 999999.99 -> 999999.99"; // placeholder
+
+            return new Control[] { label, comboAccount, labelTotalExpense, buttonSave };
+        }
+
         public PurchaseSpreadSheet()
         {
-            InitializeComponent();
+            gridForm = new GridForm(InitControls());
+
+            gridForm.GridView.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+            gridForm.GridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            gridForm.GridView.CellPainting += new System.Windows.Forms.DataGridViewCellPaintingEventHandler(this.grid_CellPainting);
+
+            gridForm.AcceptButton = this.buttonSave;
+            gridForm.Text = "PurchaseSpreadSheet";
+            gridForm.Load += new System.EventHandler(this.PurchaseSpreadSheet_Load);
+        }
+
+        public DialogResult ShowDialog(IWin32Window owner)
+        {
+            return gridForm.ShowDialog(owner);
         }
 
         private void PurchaseSpreadSheet_Load(object sender, EventArgs e)
@@ -29,17 +69,17 @@ namespace Home_Accounting
             comboAccount.DisplayMember = "Name";
             comboAccount.ValueMember = "ID";
 
-            grid.DataSource = PasteClipboard();
+            gridForm.GridView.DataSource = PasteClipboard();
 
             UpdateTotalExpense();
 
-            this.comboAccount.SelectedIndexChanged += new System.EventHandler(this.comboAccount_SelectedIndexChanged);
+            comboAccount.SelectedIndexChanged += new System.EventHandler(comboAccount_SelectedIndexChanged);
         }
 
         private void UpdateTotalExpense()
         {
             DataRowView selectedAccount = (DataRowView)comboAccount.SelectedItem;
-            DataTable tableExpenses = (DataTable)grid.DataSource;
+            DataTable tableExpenses = (DataTable)gridForm.GridView.DataSource;
 
             Decimal total = (Decimal)tableExpenses.Compute("SUM(Amount)", null);
             Decimal balance = (Decimal)selectedAccount["Balance"];
@@ -75,7 +115,8 @@ namespace Home_Accounting
 
         private void grid_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
         {
-            if (e.ColumnIndex >= 0 && grid.Columns[e.ColumnIndex].Name == "Category")
+            if (e.ColumnIndex >= 0 && 
+                gridForm.GridView.Columns[e.ColumnIndex].Name == "Category")
             {
                 if (!new Category().Exists(e.Value as string)) {
                     e.CellStyle.BackColor = Color.LightPink;
@@ -89,7 +130,7 @@ namespace Home_Accounting
             AccountForm accountForm = MainForm.GetInstance().GetAccountForm((int)comboAccount.SelectedValue);
             Category categoryService = new Category();
 
-            DataTable table = (DataTable)grid.DataSource;
+            DataTable table = (DataTable)gridForm.GridView.DataSource;
             for (int i = 0; i < table.Rows.Count; )
             {
                 DataRow row = table.Rows[i];
@@ -102,7 +143,7 @@ namespace Home_Accounting
                 purchaseForm.CategoryID = categoryId;
                 purchaseForm.DebitChecked = false;
 
-                if (purchaseForm.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+                if (purchaseForm.ShowDialog(gridForm) == System.Windows.Forms.DialogResult.OK)
                 {
                     row.Delete(); // causes exception about loop failure
                 } else
