@@ -481,7 +481,7 @@ namespace Home_Accounting
 
         private void clipboardToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            PurchaseSpreadSheet form = new PurchaseSpreadSheet();
+            var form = new CashPurchaseSpreadSheet();
             form.ShowDialog(this);
         }
     }

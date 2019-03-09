@@ -88,6 +88,7 @@
     <Compile Include="AccountForm.Designer.cs">
       <DependentUpon>AccountForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="PurchaseSpreadSheet.cs" />
     <Compile Include="Category.cs" />
     <Compile Include="CategoryPicker.cs">
       <SubType>Form</SubType>
@@ -216,7 +217,7 @@
     <Compile Include="PurchaseForm.Designer.cs">
       <DependentUpon>PurchaseForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="PurchaseSpreadSheet.cs" />
+    <Compile Include="CashPurchaseSpreadSheet.cs" />
     <Compile Include="GridForm.cs">
       <SubType>Form</SubType>
     </Compile>
