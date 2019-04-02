@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.OleDb;
 using System.Linq;
 using System.Text;
@@ -87,6 +88,19 @@ namespace Home_Accounting
             {
                 MessageBox.Show(unresolvedOperations, "Unresolved Operations");
             }
+        }
+
+        internal static DataTable GetUncheckedTransactions(int accountID)
+        {
+            OleDbCommand cmd = DataUtil.Connection.CreateCommand();
+            cmd.CommandText = string.Format("select ID, Amount, [When] from BankAccountDebit where AccountID = {0} and " +
+                "Checked = false order by [When] asc", accountID);
+
+            OleDbDataAdapter adapter = new OleDbDataAdapter(cmd);
+            DataTable dataTable = new DataTable();
+            adapter.Fill(dataTable);
+
+            return dataTable;
         }
     }
 }

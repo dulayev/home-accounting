@@ -8,6 +8,7 @@ namespace Home_Accounting
     public class PurchaseSpreadSheet
     {
         private readonly string accountFilter;
+        private readonly string sumFilter;
         private GridForm gridForm;
         private System.Windows.Forms.Button buttonSave;
         private System.Windows.Forms.ComboBox comboAccount;
@@ -31,9 +32,10 @@ namespace Home_Accounting
             return gridForm.ShowDialog(owner);
         }
 
-        protected PurchaseSpreadSheet(string accountFilter)
+        protected PurchaseSpreadSheet(string accountFilter, string sumFilter = null)
         {
             this.accountFilter = accountFilter;
+            this.sumFilter = sumFilter;
 
             gridForm = new GridForm(InitControls());
 
@@ -94,7 +96,7 @@ namespace Home_Accounting
             DataRowView selectedAccount = (DataRowView)comboAccount.SelectedItem;
             DataTable tableExpenses = (DataTable)gridForm.GridView.DataSource;
 
-            Decimal total = (Decimal)tableExpenses.Compute("SUM(Amount)", null);
+            Decimal total = (Decimal)tableExpenses.Compute("SUM(Amount)", sumFilter);
             Decimal balance = (Decimal)selectedAccount["Balance"];
             labelTotalExpense.Text = string.Format("{0}: {1} -> {2}",
                 selectedAccount["Currency"], balance, balance - total);
