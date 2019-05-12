@@ -60,27 +60,35 @@ namespace Home_Accounting
         public string GetFullName(int id)
         {
             string fullName = null;
-            for (;;) {
-                cmdGet.Parameters["Id"].Value = id;
-                using (OleDbDataReader reader = cmdGet.ExecuteReader())
+            if (id > 0)
+            {
+                for (; ; )
                 {
-                    if (!reader.Read())
+                    cmdGet.Parameters["Id"].Value = id;
+                    using (OleDbDataReader reader = cmdGet.ExecuteReader())
                     {
-                        throw new Exception(string.Format("No Category row for id:{0}, fullName:{1} so far", id, fullName));
+                        if (!reader.Read())
+                        {
+                            throw new Exception(string.Format("No Category row for id:{0}, fullName:{1} so far", id, fullName));
+                        }
+                        string name = reader.GetString(1);
+                        if (fullName == null)
+                        {
+                            fullName = name;
+                        }
+                        else
+                        {
+                            fullName = name + Slash + fullName;
+                        }
+                        int parentId = reader.GetInt32(0);
+                        if (parentId == 0) break;
+                        id = parentId;
                     }
-                    string name = reader.GetString(1);
-                    if (fullName == null)
-                    {
-                        fullName = name;
-                    }
-                    else
-                    {
-                        fullName = name + Slash + fullName;
-                    }
-                    int parentId = reader.GetInt32(0);
-                    if (parentId == 0) break;
-                    id = parentId;
                 }
+            }
+            else
+            {
+                fullName = "";
             }
             return fullName;
         }

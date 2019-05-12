@@ -32,6 +32,11 @@ namespace Home_Accounting
             return gridForm.ShowDialog(owner);
         }
 
+        public void Show(IWin32Window owner)
+        {
+            gridForm.Show(owner);
+        }
+
         protected PurchaseSpreadSheet(string accountFilter, string sumFilter = null)
         {
             this.accountFilter = accountFilter;

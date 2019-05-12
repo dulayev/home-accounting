@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Windows.Forms;
 
 namespace Home_Accounting
 {
@@ -70,6 +71,21 @@ namespace Home_Accounting
 
             this.flowLayoutPanel1.ResumeLayout(true);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            this.ResumeLayout(false);
+        }
+
+        internal void AddControl(Control control)
+        {
+            this.flowLayoutPanel1.SuspendLayout();
+            this.SuspendLayout();
+
+            this.flowLayoutPanel1.Controls.Add(control);
+            if (flowLayoutPanel1.Height < control.Height)
+            {
+                flowLayoutPanel1.Size = new System.Drawing.Size(flowLayoutPanel1.Width, control.Height);
+            }
+
+            this.flowLayoutPanel1.ResumeLayout(true);
             this.ResumeLayout(false);
         }
     }

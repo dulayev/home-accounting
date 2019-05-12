@@ -3,11 +3,63 @@ using System.Collections.Generic;
 using System.Text;
 using System.Data.OleDb;
 using System.Data;
+using System.Diagnostics;
 
 namespace Home_Accounting
 {
     class DataUtil
     {
+        static readonly List<string> NO_MATCH_WORDS = new List<string>() { " ŒœÀ¿“¿ " }; // meaningless matches
+        public static int CommonPart(string s0, string s1)
+        {
+            s0 = s0.ToUpper();
+            s1 = s1.ToUpper();
+            const int MIN_MATCH = 5; // min length of match to be taken into account
+            // to suppress accumulation matches of single symbols
+            
+            //s0: 0123456
+            //s1: +j  012
+            // j: [-s1.len-1, s0.len-1]
+            // compare s0[j+i]==s1[i], 
+            int total = 0;
+            for (int j = -(s1.Length - 1); j < s0.Length; ++j)
+            {
+                //Prints regions being compared
+                //Debug.WriteLine(new string(' ', 10) + s0);
+                //Debug.WriteLine(new string(' ', 10 + j) + s1);
+                int match = 0;
+                //Debug.Write(new string(' ', 10 + j + (j < 0 ? -j : 0)));
+                int i;
+                Action<int> useMatch = (endPos) => {
+                    if (match >= MIN_MATCH && !NO_MATCH_WORDS.Contains(s1.Substring(endPos - match, match))) // 
+                    {
+                        total += match * match;
+                    }
+                    match = 0;
+                };
+                for (i = (j < 0 ? -j : 0); i < s1.Length && j + i < s0.Length; ++i)
+                {
+                    //Debug.Write("*");
+                    if (s0[j + i] == s1[i]) match++;
+                    else
+                    {
+                        useMatch(i);
+                    }
+                }
+                //Debug.WriteLine("");
+                useMatch(i);
+            }
+            return total;
+        }
+
+        public static void Test_CommonPart()
+        {
+            Debug.Assert(CommonPart("AAAAA1111111111", "22222AAAAA") == 25);
+            Debug.Assert(CommonPart("1111111111AAAAA", "AAAAA22222") == 25);
+            Debug.Assert(CommonPart("1111ABCDE111", "222ABCDE2222") == 25);
+            Debug.Assert(CommonPart("1D11ABCDE111", "222ABCDE22D2") == 25); // ABCDE gives 5*5, D ignored
+        }
+
         public static event Action<int> OnAccountUpdate; // Action is generic delegate without return
 
         public static void FireAccountUpdate(int accountID)

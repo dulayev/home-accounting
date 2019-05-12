@@ -16,6 +16,9 @@ namespace Home_Accounting
         [STAThread]
         static void Main()
         {
+            // Call unit tests
+            DataUtil.Test_CommonPart();
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());

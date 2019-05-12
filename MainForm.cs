@@ -391,7 +391,7 @@ namespace Home_Accounting
                 else
                 {
                     var form = new BankPurchaseSpreadSheet(transactions, accountID);
-                    form.ShowDialog(this); //TODO: make modeless
+                    form.Show(this);
                 }
             }
         }
