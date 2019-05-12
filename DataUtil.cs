@@ -30,13 +30,14 @@ namespace Home_Accounting
                 int match = 0;
                 //Debug.Write(new string(' ', 10 + j + (j < 0 ? -j : 0)));
                 int i;
-                Action<int> useMatch = (endPos) => {
+                void useMatch(int endPos)
+                {
                     if (match >= MIN_MATCH && !NO_MATCH_WORDS.Contains(s1.Substring(endPos - match, match))) // 
                     {
                         total += match * match;
                     }
                     match = 0;
-                };
+                }
                 for (i = (j < 0 ? -j : 0); i < s1.Length && j + i < s0.Length; ++i)
                 {
                     //Debug.Write("*");

@@ -18,18 +18,18 @@ namespace Home_Accounting
         {
             if (fullName is null) return null;
             int parentId = 0;
-            return getId(parentId, fullName.Split('/'), 0);
+            return GetId(parentId, fullName.Split('/'), 0);
         }
         public int CreateMissing(string fullName)
         {
-            return createMissing(0, fullName.Split('/'), 0, true);
+            return CreateMissing(0, fullName.Split('/'), 0, true);
         }
-        public int createMissing(int parentId, string[] nameParts, int partsIndex, bool checkExisting)
+        public int CreateMissing(int parentId, string[] nameParts, int partsIndex, bool checkExisting)
         {
             if (partsIndex >= nameParts.Length) throw new ArgumentOutOfRangeException("partsIndex");
 
             int? id = null;
-            if (checkExisting) id = getId(parentId, nameParts[partsIndex]);
+            if (checkExisting) id = GetId(parentId, nameParts[partsIndex]);
 
             if (!id.HasValue)
             {
@@ -37,7 +37,7 @@ namespace Home_Accounting
                 checkExisting = false; // no need to search in deeper levels
             }
 
-            id = getId(parentId, nameParts[partsIndex]);
+            id = GetId(parentId, nameParts[partsIndex]);
 
             if (!id.HasValue) throw new Exception(string.Format("Category should exist {0}-{1}", parentId, nameParts[partsIndex]));
 
@@ -47,7 +47,7 @@ namespace Home_Accounting
             }
             else
             {
-                return createMissing(id.Value, nameParts, partsIndex + 1, checkExisting);
+                return CreateMissing(id.Value, nameParts, partsIndex + 1, checkExisting);
             }
         }
         private void Create(int parentId, string name)
@@ -93,24 +93,24 @@ namespace Home_Accounting
             return fullName;
         }
 
-        private Nullable<int> getId(int parentId, string name)
+        private Nullable<int> GetId(int parentId, string name)
         {
             cmdFind.Parameters["name"].Value = name;
             cmdFind.Parameters["parentId"].Value = parentId;
             object res = cmdFind.ExecuteScalar();
             return res as int?;
         }
-        private Nullable<int> getId(int parentId, string[] nameParts, int partsIndex)
+        private Nullable<int> GetId(int parentId, string[] nameParts, int partsIndex)
         {
             if (partsIndex < nameParts.Length)
             {
-                int? id = getId(parentId, nameParts[partsIndex]);
+                int? id = GetId(parentId, nameParts[partsIndex]);
                 if (!id.HasValue || partsIndex >= nameParts.GetUpperBound(0))
                 {
                     return id;
                 } else
                 {
-                    return getId(id.Value, nameParts, partsIndex + 1);
+                    return GetId(id.Value, nameParts, partsIndex + 1);
                 }
             } else
             {

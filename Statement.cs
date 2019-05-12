@@ -25,7 +25,7 @@ namespace Home_Accounting
             }
         };
 
-        static private string packDescription(string description)
+        static private string PackDescription(string description)
         {
             description = description.Trim();
             Regex regex = new Regex(" +");
@@ -33,7 +33,7 @@ namespace Home_Accounting
             return description;
         }
 
-        static internal void importStatement(List<Statement.Transaction> transactions, int accountID)
+        static internal void ImportStatement(List<Statement.Transaction> transactions, int accountID)
         {
             string unresolvedOperations = "";
 
@@ -69,13 +69,14 @@ namespace Home_Accounting
             else
             {
                 AccountForm accountForm = MainForm.GetInstance().GetAccountForm(accountID);
-                PurchaseForm purchaseForm = new PurchaseForm(accountForm);
-
-                purchaseForm.Amount = (-transaction.amount).ToString();
-                purchaseForm.Description = packDescription(transaction.description);
-                purchaseForm.When = transaction.date;
-                purchaseForm.CategoryID = transaction.category;
-                purchaseForm.DebitChecked = true;
+                PurchaseForm purchaseForm = new PurchaseForm(accountForm)
+                {
+                    Amount = (-transaction.amount).ToString(),
+                    Description = PackDescription(transaction.description),
+                    When = transaction.date,
+                    CategoryID = transaction.category,
+                    DebitChecked = true
+                };
                 //purchaseForm.AutoClose = !interactive; //TODO:uncomment
 
                 res = (purchaseForm.ShowDialog(MainForm.GetInstance()) == System.Windows.Forms.DialogResult.OK);

@@ -5,7 +5,6 @@ using System.Data.OleDb;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 namespace Home_Accounting
@@ -51,9 +50,11 @@ namespace Home_Accounting
             {
                 int index = GridForm.GridView.Columns.IndexOf(column);
                 GridForm.GridView.Columns.Remove(column);
-                DataGridViewButtonColumn buttonColumn = new DataGridViewButtonColumn();
-                buttonColumn.Name = CATEGORY;
-                buttonColumn.UseColumnTextForButtonValue = true;
+                DataGridViewButtonColumn buttonColumn = new DataGridViewButtonColumn
+                {
+                    Name = CATEGORY,
+                    UseColumnTextForButtonValue = true
+                };
                 GridForm.GridView.Columns.Insert(index, buttonColumn);
 
                 GridForm.GridView.CellClick += GridView_CellClick;
@@ -184,13 +185,13 @@ namespace Home_Accounting
                     transactions.Add(((DataRowView)viewRow.DataBoundItem).Row);
                 }
 
-                searchBestMatching(transactions, authLines);
+                SearchBestMatching(transactions, authLines);
 
                 Clipboard.SetText(string.Join(Environment.NewLine, authLines));
             }
         }
 
-        private void searchBestMatching(List<DataRow> transactions, List<string> authLines)
+        private void SearchBestMatching(List<DataRow> transactions, List<string> authLines)
         {
             if (transactions.Count == 0) return;
 
@@ -310,9 +311,9 @@ namespace Home_Accounting
 
         private static bool FindWholeNumber(string text, string number)
         {
-            Func<char, bool> edgeChar = ch => !char.IsLetterOrDigit(ch) && (ch != '.');
-            Func<int, bool> leftEdge = i => (i < 0) || edgeChar(text[i]);
-            Func<int, bool> rightEdge = i => (i >= text.Length) || edgeChar(text[i]);
+            bool edgeChar(char ch) => !char.IsLetterOrDigit(ch) && (ch != '.');
+            bool leftEdge(int i) => (i < 0) || edgeChar(text[i]);
+            bool rightEdge(int i) => (i >= text.Length) || edgeChar(text[i]);
 
             string lookFor = number + "RUB";
             int startIndex = 0;
@@ -391,11 +392,13 @@ namespace Home_Accounting
 
         private Statement.Transaction Convert(DataRow row)
         {
-            Statement.Transaction res = new Statement.Transaction();
-            res.date = (DateTime)row[DATE];
-            res.category = (int)row[CATEGORY];
-            res.amount = -(decimal)row[AMOUNT];
-            res.description = (string)row[DESCRIPTION];
+            Statement.Transaction res = new Statement.Transaction
+            {
+                date = (DateTime)row[DATE],
+                category = (int)row[CATEGORY],
+                amount = -(decimal)row[AMOUNT],
+                description = (string)row[DESCRIPTION]
+            };
             return res;
         }
 

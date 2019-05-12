@@ -40,8 +40,7 @@ namespace Home_Accounting
 
             foreach (Control control in Controls)
             {
-                MdiClient mdiClient = control as MdiClient;
-                if (mdiClient != null)
+                if (control is MdiClient mdiClient)
                     mdiClient.BackColor = BackColor;
             }
 
@@ -69,18 +68,24 @@ namespace Home_Accounting
 
             foreach (DataRow dr in tableAccounts.Rows)
             {
-                AccountForm accountForm = new AccountForm((int)dr["ID"]);
-                accountForm.MdiParent = this;
+                AccountForm accountForm = new AccountForm((int)dr["ID"])
+                {
+                    MdiParent = this
+                };
 
                 accountForm.Show();
             }
 
-            ShopForm shopForm = new ShopForm();
-            shopForm.MdiParent = this;
+            ShopForm shopForm = new ShopForm
+            {
+                MdiParent = this
+            };
             shopForm.Show();
 
-            DebtForm debtForm = new DebtForm();
-            debtForm.MdiParent = this;
+            DebtForm debtForm = new DebtForm
+            {
+                MdiParent = this
+            };
             debtForm.Show();
 
             CreateOperationsForm();
@@ -128,13 +133,13 @@ namespace Home_Accounting
             OleDbCommand cmd = new OleDbCommand(null, DataUtil.Connection);
             QueryForm queryForm = new QueryForm(controls, cmd);
 
-            EventHandler updateQuery = (object sender, EventArgs e) =>
+            void updateQuery(object sender, EventArgs e)
             {
                 queryForm.DbCommand.CommandText = string.Format(
                     "SELECT * FROM Purchase where Account = {0} order by Date desc",
                     comboAccount.SelectedValue);
                 queryForm.Reload();
-            };
+            }
 
             comboAccount.SelectedValueChanged += updateQuery;
             // when become visible, comboAccount.SelectedValue gets value and reasonable sql could be made
@@ -179,8 +184,7 @@ namespace Home_Accounting
         {
             foreach(Form form in MdiChildren)
             {
-                AccountForm accountForm = form as AccountForm;
-                if (accountForm != null && accountForm.ID == accountID)
+                if (form is AccountForm accountForm && accountForm.ID == accountID)
                 {
                     return accountForm;
                 }
@@ -189,7 +193,7 @@ namespace Home_Accounting
             return null;
         }
 
-        private static string trimSymmetric(string text, char symbol)
+        private static string TrimSymmetric(string text, char symbol)
         {
             while (text.Length >= 2 && text[0] == symbol && text[text.Length - 1] == symbol)
             {
@@ -198,7 +202,7 @@ namespace Home_Accounting
             return text;
         }
 
-        private static string[] splitToFields(string text, char delimiter)
+        private static string[] SplitToFields(string text, char delimiter)
         {
             List<String> list = new List<String>();
             int startField = 0;
@@ -217,7 +221,7 @@ namespace Home_Accounting
             return list.ToArray();
         }
 
-        private void loadStatement()
+        private void LoadStatement()
         {
             int accountID = 0;
 
@@ -298,8 +302,10 @@ namespace Home_Accounting
                                 fields[j] = fields[j].Trim('\"');
                             }
 
-                            Statement.Transaction transaction = new Statement.Transaction();
-                            transaction.sourceText = line;
+                            Statement.Transaction transaction = new Statement.Transaction
+                            {
+                                sourceText = line
+                            };
                             try
                             {
                                 // account will be determined by last line
@@ -344,13 +350,15 @@ namespace Home_Accounting
 
                             if (char.IsDigit(line[0]))
                             {
-                                string[] fields = splitToFields(line, ';');
+                                string[] fields = SplitToFields(line, ';');
 
-                                Statement.Transaction transaction = new Statement.Transaction();
-                                transaction.date = DateTime.Parse(fields[0]);
-                                transaction.description = trimSymmetric(fields[2], '\"') + " " + trimSymmetric(fields[3], '\"');
-                                transaction.amount = Decimal.Parse(fields[4]);
-                                transaction.sourceText = line;
+                                Statement.Transaction transaction = new Statement.Transaction
+                                {
+                                    date = DateTime.Parse(fields[0]),
+                                    description = TrimSymmetric(fields[2], '\"') + " " + TrimSymmetric(fields[3], '\"'),
+                                    amount = Decimal.Parse(fields[4]),
+                                    sourceText = line
+                                };
 
                                 transactions.Add(transaction);
                             }
@@ -365,7 +373,7 @@ namespace Home_Accounting
                         for (int i = lines.Length - 1; i >= 0; --i)
                         {
                             string line = lines[i];
-                            string[] fields = splitToFields(line, ';');
+                            string[] fields = SplitToFields(line, ';');
 
                             NumberFormatInfo nfi = (NumberFormatInfo)CultureInfo.CurrentCulture.NumberFormat.Clone();
                             nfi.NumberDecimalSeparator = ",";
@@ -373,11 +381,13 @@ namespace Home_Accounting
                             if (char.IsDigit(fields[1][0])) // account number is digit
                             {
 
-                                Statement.Transaction transaction = new Statement.Transaction();
-                                transaction.date = DateTime.Parse(fields[3]);
-                                transaction.description = fields[5];
-                                transaction.amount = Decimal.Parse(fields[6], nfi) - Decimal.Parse(fields[7], nfi);
-                                transaction.sourceText = line;
+                                Statement.Transaction transaction = new Statement.Transaction
+                                {
+                                    date = DateTime.Parse(fields[3]),
+                                    description = fields[5],
+                                    amount = Decimal.Parse(fields[6], nfi) - Decimal.Parse(fields[7], nfi),
+                                    sourceText = line
+                                };
 
                                 transactions.Add(transaction);
                             }
@@ -396,12 +406,12 @@ namespace Home_Accounting
             }
         }
 
-        private void checkToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CheckToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            loadStatement();
+            LoadStatement();
         }
 
-        private void clipboardToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ClipboardToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var form = new CashPurchaseSpreadSheet();
             form.ShowDialog(this);

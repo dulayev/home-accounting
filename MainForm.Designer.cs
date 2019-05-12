@@ -60,14 +60,14 @@
             this.checkToolStripMenuItem.Name = "checkToolStripMenuItem";
             this.checkToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.checkToolStripMenuItem.Text = "Check";
-            this.checkToolStripMenuItem.Click += new System.EventHandler(this.checkToolStripMenuItem_Click);
+            this.checkToolStripMenuItem.Click += new System.EventHandler(this.CheckToolStripMenuItem_Click);
             // 
             // clipboardToolStripMenuItem
             // 
             this.clipboardToolStripMenuItem.Name = "clipboardToolStripMenuItem";
             this.clipboardToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.clipboardToolStripMenuItem.Text = "Clipboard";
-            this.clipboardToolStripMenuItem.Click += new System.EventHandler(this.clipboardToolStripMenuItem_Click);
+            this.clipboardToolStripMenuItem.Click += new System.EventHandler(this.ClipboardToolStripMenuItem_Click);
             // 
             // MainForm
             // 
