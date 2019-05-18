@@ -321,25 +321,28 @@ namespace Home_Accounting
             bool leftEdge(int i) => (i < 0) || edgeChar(text[i]);
             bool rightEdge(int i) => (i >= text.Length) || edgeChar(text[i]);
 
-            string lookFor = number + "RUB";
-            int startIndex = 0;
-            while (startIndex < text.Length)
+            foreach (string currency in new string[]{ "RUB", " EUR" })
             {
-                int pos = text.IndexOf(lookFor, startIndex);
-                if (pos >= 0)
+                string lookFor = number + currency;
+                int startIndex = 0;
+                while (startIndex < text.Length)
                 {
-                    if (leftEdge(pos - 1) && rightEdge(pos + lookFor.Length))
+                    int pos = text.IndexOf(lookFor, startIndex);
+                    if (pos >= 0)
                     {
-                        return true;
+                        if (leftEdge(pos - 1) && rightEdge(pos + lookFor.Length))
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            startIndex = pos + 1;
+                        }
                     }
                     else
                     {
-                        startIndex = pos + 1;
+                        break;
                     }
-                }
-                else
-                {
-                    break;
                 }
             }
             return false;
