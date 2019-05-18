@@ -187,7 +187,13 @@ namespace Home_Accounting
 
                 SearchBestMatching(transactions, authLines);
 
-                Clipboard.SetText(string.Join(Environment.NewLine, authLines));
+                if (authLines.Count > 0)
+                {
+                    Clipboard.SetText(string.Join(Environment.NewLine, authLines));
+                } else
+                {
+                    Clipboard.Clear();
+                }
             }
         }
 
