@@ -58,7 +58,7 @@ namespace Home_Accounting
             }
         }
 
-        private void textBoxSrcAmount_TextChanged(object sender, EventArgs e)
+        private void TextBoxSrcAmount_TextChanged(object sender, EventArgs e)
         {
             if (textBoxDstAmount.ReadOnly)
             {
@@ -67,7 +67,7 @@ namespace Home_Accounting
             UpdateRate();
         }
 
-        private void textBoxDstAmount_TextChanged(object sender, EventArgs e)
+        private void TextBoxDstAmount_TextChanged(object sender, EventArgs e)
         {
             UpdateRate();
         }

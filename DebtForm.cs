@@ -59,7 +59,7 @@ namespace Home_Accounting
 
         internal void ReloadDebts()
         {
-            string sql = "SELECT Debt.ID, Debt.Name, Debt.Amount, Debt.Plan, [Currency] FROM Debt WHERE (((Debt.Actual) Is Null))";
+            string sql = "SELECT Debt.ID, Debt.Name, Debt.Amount, Debt.Plan, Debt.AmountBack, [Currency] FROM Debt WHERE (((Debt.Actual) Is Null))";
             OleDbCommand cmd = new OleDbCommand(sql, DataUtil.Connection);
             OleDbDataAdapter adapter = new OleDbDataAdapter(cmd);
             debtTable.Clear();
@@ -67,7 +67,7 @@ namespace Home_Accounting
             dataGridView1.DataSource = debtTable;
         }
 
-        private void dataGridView1_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
+        private void DataGridView1_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
         {
             if (dataGridView1.SelectedRows.Count > 0)
                 DoDragDrop(this, DragDropEffects.All);

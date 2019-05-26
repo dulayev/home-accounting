@@ -67,7 +67,7 @@ namespace Home_Accounting
             this.textBoxSrcAmount.Name = "textBoxSrcAmount";
             this.textBoxSrcAmount.Size = new System.Drawing.Size(100, 20);
             this.textBoxSrcAmount.TabIndex = 2;
-            this.textBoxSrcAmount.TextChanged += new System.EventHandler(this.textBoxSrcAmount_TextChanged);
+            this.textBoxSrcAmount.TextChanged += new System.EventHandler(this.TextBoxSrcAmount_TextChanged);
             // 
             // labelSrc
             // 
@@ -103,7 +103,7 @@ namespace Home_Accounting
             this.textBoxDstAmount.Name = "textBoxDstAmount";
             this.textBoxDstAmount.Size = new System.Drawing.Size(100, 20);
             this.textBoxDstAmount.TabIndex = 4;
-            this.textBoxDstAmount.TextChanged += new System.EventHandler(this.textBoxDstAmount_TextChanged);
+            this.textBoxDstAmount.TextChanged += new System.EventHandler(this.TextBoxDstAmount_TextChanged);
             // 
             // labelRate
             // 

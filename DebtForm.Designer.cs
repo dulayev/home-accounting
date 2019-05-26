@@ -31,6 +31,7 @@ namespace Home_Accounting
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnAmountBack = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Currency = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -48,6 +49,7 @@ namespace Home_Accounting
             this.Column1,
             this.Column2,
             this.Column3,
+            this.ColumnAmountBack,
             this.Currency});
             this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dataGridView1.Location = new System.Drawing.Point(0, 0);
@@ -57,7 +59,7 @@ namespace Home_Accounting
             this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridView1.Size = new System.Drawing.Size(438, 127);
             this.dataGridView1.TabIndex = 0;
-            this.dataGridView1.CellMouseDown += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridView1_CellMouseDown);
+            this.dataGridView1.CellMouseDown += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DataGridView1_CellMouseDown);
             this.dataGridView1.DragDrop += new System.Windows.Forms.DragEventHandler(this.DebtForm_DragDrop);
             this.dataGridView1.DragOver += new System.Windows.Forms.DragEventHandler(this.DebtForm_DragOver);
             // 
@@ -87,6 +89,15 @@ namespace Home_Accounting
             this.Column3.Name = "Column3";
             this.Column3.ReadOnly = true;
             this.Column3.Width = 47;
+            // 
+            // ColumnAmountBack
+            // 
+            this.ColumnAmountBack.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.ColumnAmountBack.DataPropertyName = "AmountBack";
+            this.ColumnAmountBack.HeaderText = "AmountBack";
+            this.ColumnAmountBack.Name = "ColumnAmountBack";
+            this.ColumnAmountBack.ReadOnly = true;
+            this.ColumnAmountBack.Width = 66;
             // 
             // Currency
             // 
@@ -122,6 +133,7 @@ namespace Home_Accounting
         private System.Windows.Forms.DataGridViewTextBoxColumn Column1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column2;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column3;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ColumnAmountBack;
         private System.Windows.Forms.DataGridViewTextBoxColumn Currency;
     }
 }

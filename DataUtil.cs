@@ -79,6 +79,7 @@ namespace Home_Accounting
             RenameColumn("Transaction", "Amount", "SourceAmount;DestinationAmount", "CURRENCY");
             AssureColumnSize("Purchase", "Name", "TEXT", 100);
             CreateColumnWithDefault("Account", "Active", "BIT", 1);
+            CreateColumn("Debt", "AmountBack", "CURRENCY");
         }
         private static void CreateColumnWithDefault(string tableName, string columnName, string type, object defaultValue)
         {
@@ -95,7 +96,7 @@ namespace Home_Accounting
         {
             if(!ColumnExists(tableName, columnName))
             {
-                string sql = string.Format("ALTER TABLE [{0}] ADD COLUMN [{1}] TEXT(3)", tableName, columnName);
+                string sql = string.Format("ALTER TABLE [{0}] ADD COLUMN [{1}] {2}", tableName, columnName, type);
                 new OleDbCommand(sql, Connection).ExecuteNonQuery();
             }
         }
@@ -156,19 +157,6 @@ namespace Home_Accounting
                 command.CommandText = string.Format("ALTER TABLE [{0}] ALTER COLUMN [{1}] {2}({3})",
                     tableName, columnName, dataType, newSize);
                 command.ExecuteNonQuery();
-            }
-        }
-        private static void AddCurrencyColumns()
-        {
-            string[] tableNames = { "Account", "Debt" };
-            foreach (string tableName in tableNames)
-            {
-                string columnName = "Currency";
-                string filter = string.Format("TABLE_NAME='{0}' AND COLUMN_NAME='{1}'", tableName, columnName);
-                DataRow[] result = Connection.GetSchema("COLUMNS").Select(filter);
-                if (result.Length == 0)
-                {
-                }
             }
         }
 
