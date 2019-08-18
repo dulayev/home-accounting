@@ -309,7 +309,7 @@ namespace Home_Accounting
                             try
                             {
                                 // account will be determined by last line
-                                accountID = (fields[5] == "*3690") ? 26 : 17;
+                                accountID = (fields[5] == "*0559") ? 26 : 17; // TODO: Match by account name
 
                                 transaction.date = DateTime.Parse(fields[0]);
                                 String credit = fields[1];
