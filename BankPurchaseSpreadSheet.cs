@@ -97,13 +97,16 @@ namespace Home_Accounting
                             }
                         }
                     }
-                    int max = categorySimilaruties.Values.Max();
-                    int chosenCategory = categorySimilaruties.First(pair => pair.Value == max).Key;
-                    if (max > 500)
+                    if (categorySimilaruties.Count > 0)
                     {
-                        dstRow[CATEGORY] = chosenCategory;
+                        int max = categorySimilaruties.Values.Max();
+                        int chosenCategory = categorySimilaruties.First(pair => pair.Value == max).Key;
+                        if (max > 500)
+                        {
+                            dstRow[CATEGORY] = chosenCategory;
+                        }
+                        dstRow["Debug"] = max.ToString() + " --- " + maxDescriptions[chosenCategory];
                     }
-                    dstRow["Debug"] = max.ToString() + " --- " + maxDescriptions[chosenCategory];
                     GridForm.GridView.UpdateCellValue(buttonColumn.Index, viewRow.Index);
                 }
             }
