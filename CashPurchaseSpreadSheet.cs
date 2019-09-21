@@ -74,7 +74,12 @@ namespace Home_Accounting
             for (int i = 0; i < table.Rows.Count; )
             {
                 DataRow row = table.Rows[i];
-                int categoryId = categoryService.CreateMissing((string)row["Category"]);
+                string category = (string)row["Category"];
+                int categoryId = 
+                    string.IsNullOrWhiteSpace(category) ?
+                    -1 :
+                    categoryService.CreateMissing(category);
+
                 // always re-create form to it catches new categories
                 PurchaseForm purchaseForm = new PurchaseForm(accountForm)
                 {
