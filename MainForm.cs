@@ -342,26 +342,34 @@ namespace Home_Accounting
                         // read csv into list
                         string contents = System.IO.File.ReadAllText(dialog.FileName, Encoding.Default);
                         string[] lines = contents.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                        int? validLineIndex = null;
                         for (int i = lines.Length - 1; i >= 0; --i)
                         {
                             // bank inserts \n to description, have to split lines on '\r\n', then delete '\n'
                             string line = lines[i].Replace("\n", "");
                             line = line.Replace("Покупка товара НДС не облагается.", ""); // remove useless phrase
 
-                            if (char.IsDigit(line[0]))
+                            string[] fields = SplitToFields(line, ';');
+                            if (fields.Length - 1 < 4) continue;
+
+                            if (!DateTime.TryParse(fields[0], out DateTime inDate)) continue;
+                            if (!Decimal.TryParse(fields[4], out Decimal inAmount)) continue;
+
+                            Statement.Transaction transaction = new Statement.Transaction
                             {
-                                string[] fields = SplitToFields(line, ';');
+                                date = inDate,
+                                description = TrimSymmetric(fields[2], '\"') + " " + TrimSymmetric(fields[3], '\"'),
+                                amount = inAmount,
+                                sourceText = line
+                            };
 
-                                Statement.Transaction transaction = new Statement.Transaction
-                                {
-                                    date = DateTime.Parse(fields[0]),
-                                    description = TrimSymmetric(fields[2], '\"') + " " + TrimSymmetric(fields[3], '\"'),
-                                    amount = Decimal.Parse(fields[4]),
-                                    sourceText = line
-                                };
+                            transactions.Add(transaction);
 
-                                transactions.Add(transaction);
+                            if (validLineIndex.HasValue && Math.Abs(validLineIndex.Value - i) != 1)
+                            {
+                                throw new Exception(string.Format("Valid %d and %d lines aren't adjacent", validLineIndex.Value, i));
                             }
+                            validLineIndex = i;
                         }
                     }
                     else if (Path.GetFileName(dialog.FileName).StartsWith("alfa-")) // processing Alfa
