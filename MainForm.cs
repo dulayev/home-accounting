@@ -128,10 +128,13 @@ namespace Home_Accounting
             comboAccount.ValueMember = "ID";
             comboAccount.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 
-            Control[] controls = new Control[] { comboAccount };
+            Label labelVerifiedBalance = new Label
+            {
+                Text = "Verified:"
+            };
 
-            OleDbCommand cmd = new OleDbCommand(null, DataUtil.Connection);
-            QueryForm queryForm = new QueryForm(controls, cmd);
+            Control[] controls = new Control[] { comboAccount, labelVerifiedBalance };
+            QueryForm queryForm = new QueryForm(controls, new OleDbCommand(null, DataUtil.Connection));
 
             void updateQuery(object sender, EventArgs e)
             {
@@ -139,6 +142,23 @@ namespace Home_Accounting
                     "SELECT * FROM Purchase where Account = {0} order by Date desc",
                     comboAccount.SelectedValue);
                 queryForm.Reload();
+
+                decimal? verifiedBalance = null;
+                var accountForm = GetAccountForm((int)comboAccount.SelectedValue);
+                if (accountForm != null) {
+                    verifiedBalance = accountForm.Balance;
+                    if (!accountForm.Cash) {
+                        OleDbCommand cmd2 = DataUtil.CreateCommand(
+                            "SELECT Sum(BankAccountDebit.Amount) AS UncheckedSum FROM BankAccountDebit " +
+                            "WHERE BankAccountDebit.AccountID = :id AND BankAccountDebit.Checked = False");
+                        cmd2.Parameters.AddWithValue("id", comboAccount.SelectedValue);
+                        if (cmd2.ExecuteScalar() is decimal uncheckedSum) {
+                            verifiedBalance += uncheckedSum;
+                        }
+                    }
+                }
+                labelVerifiedBalance.Text = labelVerifiedBalance.Text.Split(new[] { ':' }, 2)[0] + 
+                    ": " + (verifiedBalance.HasValue ? verifiedBalance.ToString() : "n/a");
             }
 
             comboAccount.SelectedValueChanged += updateQuery;
