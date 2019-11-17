@@ -51,6 +51,19 @@ namespace Home_Accounting
             LoadCategories(0, treeView1.Nodes);
         }
 
+        protected override bool ProcessDialogKey(Keys keyData) {
+            if (Form.ModifierKeys == Keys.None) {
+                if (keyData == Keys.Escape) {
+                    EndDialog(null);
+                    return true;
+                } else if (keyData == Keys.Enter) {
+                    EndDialog(treeView1.SelectedNode);
+                    return true;
+                }
+            }
+            return base.ProcessDialogKey(keyData);
+        }
+
         private void CategoryPicker_Load(object sender, EventArgs e)
         {
             //LoadTableCategories();
@@ -74,18 +87,28 @@ namespace Home_Accounting
             return null;
         }
 
+
+
         void treeView1_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             if (e.Node != null)
             {
                 if (e.Node.Bounds.Contains(e.Location))
                 {
-                    CategoryID = (int)e.Node.Tag;
-                    CategoryName = e.Node.FullPath;
-                    DialogResult = DialogResult.OK;
-                    Close();
+                    EndDialog(e.Node);
                 }
             }
+        }
+
+        private void EndDialog(TreeNode node) {
+            if (node != null) {
+                CategoryID = (int)node.Tag;
+                CategoryName = node.FullPath;
+                DialogResult = DialogResult.OK;
+            } else {
+                DialogResult = DialogResult.Cancel;
+            }
+            Close();
         }
 
         private void LoadTableCategories()

@@ -38,6 +38,18 @@ namespace Home_Accounting
 
             pasteAuthorizations.Click += PasteAuthorizations_Click;
             GridForm.AddControl(pasteAuthorizations);
+
+            GridForm.KeyPreview = true;
+            GridForm.KeyDown += GridForm_KeyDown;
+        }
+
+        private void GridForm_KeyDown(object sender, KeyEventArgs e) {
+            if (e.KeyCode == Keys.S && e.Modifiers.HasFlag(Keys.Control)) {
+
+            	SaveSelection_Click(sender, e);
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
         }
 
         const string DATE = "Date";
@@ -114,6 +126,19 @@ namespace Home_Accounting
             }
         }
 
+        private void SaveSelection_Click(object o, EventArgs dummy) {
+            DataGridViewRow[] selectedRows = new DataGridViewRow[GridForm.GridView.SelectedRows.Count];
+            GridForm.GridView.SelectedRows.CopyTo(selectedRows, 0);
+
+            foreach (DataGridViewRow viewRow in selectedRows.OrderBy(row => row.Index)) {
+                DataRow row = GetGridDataRow(viewRow);
+                Statement.Transaction transaction = Convert(row);
+                if (Statement.ImportTransaction(transaction, accountID, true)) {
+                    GridForm.GridView.Rows.Remove(viewRow);
+                }
+            }
+        }
+
         private void GridView_CellContextMenuStripNeeded(object sender, DataGridViewCellContextMenuStripNeededEventArgs e)
         {
             if (e.RowIndex >= 0)
@@ -121,21 +146,7 @@ namespace Home_Accounting
                 e.ContextMenuStrip = new ContextMenuStrip();
 
                 ToolStripItem item = e.ContextMenuStrip.Items.Add("Manually Save Selection");
-                item.Click += new EventHandler((object o, EventArgs dummy) => {
-
-                    DataGridViewRow[] selectedRows = new DataGridViewRow[GridForm.GridView.SelectedRows.Count];
-                    GridForm.GridView.SelectedRows.CopyTo(selectedRows, 0);
-
-                    foreach (DataGridViewRow viewRow in selectedRows.OrderBy(row => row.Index))
-                    {
-                        DataRow row = GetGridDataRow(viewRow);
-                        Statement.Transaction transaction = Convert(row);
-                        if (Statement.ImportTransaction(transaction, accountID, true))
-                        {
-                            GridForm.GridView.Rows.Remove(viewRow);
-                        }
-                    }
-                });
+                item.Click += SaveSelection_Click;
 
                 if (GridForm.GridView.Columns[e.ColumnIndex].Name == CATEGORY)
                 {
@@ -490,7 +501,7 @@ namespace Home_Accounting
 
         private void GridView_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (GridForm.GridView.Columns[e.ColumnIndex].Name.Equals(CATEGORY) && e.RowIndex >= 0)
+            if (GridForm.GridView.Columns[e.ColumnIndex].Name.Equals(CATEGORY) && e.RowIndex >= 0 && e.RowIndex < GridForm.GridView.RowCount)
             {
                 DataRow row = GetGridDataRow(e.RowIndex);
                 int category = (int)row[CATEGORY];
