@@ -4,7 +4,9 @@ using System.Data;
 using System.Data.OleDb;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace Home_Accounting
@@ -173,12 +175,74 @@ namespace Home_Accounting
             }
         }
 
+        struct Authorization
+        {
+            public string merchant;
+            public decimal amount;
+            public string currency;
+            public DateTime moment;
+            public string accountId;
+
+            static bool DateTimeEquals(DateTime a, DateTime b, TimeSpan tolerance) {
+                return (a <= b + tolerance) && (a >= b - tolerance);
+            }
+
+            public void Test() {
+                DateTime a = DateTime.FromFileTime(0);
+                Trace.Assert(DateTimeEquals(a, a, TimeSpan.FromMinutes(0)));
+                Trace.Assert(!DateTimeEquals(a, a.AddMinutes(1), TimeSpan.FromMinutes(0)));
+                Trace.Assert(DateTimeEquals(a, a.AddMinutes(1), TimeSpan.FromMinutes(1)));
+                Trace.Assert(DateTimeEquals(a.AddMinutes(-1), a, TimeSpan.FromMinutes(1)));
+                Trace.Assert(!DateTimeEquals(a, a.AddMinutes(2), TimeSpan.FromMinutes(1)));
+                Trace.Assert(!DateTimeEquals(a.AddMinutes(-2), a, TimeSpan.FromMinutes(1)));
+            }
+
+            public bool AuthEquals(Authorization other, TimeSpan tolerance) {
+                bool CommonEquals(string a, string b) {
+                    int len = Math.Min(a.Length, b.Length);
+                    return string.Compare(a, 0, b, 0, len) == 0;
+                }
+                return CommonEquals(merchant, other.merchant) &&
+                    amount == other.amount &&
+                    currency == other.currency &&
+                    DateTimeEquals(moment, other.moment, tolerance) &&
+                    accountId == other.accountId;
+            }
+            public override string ToString() {
+                return string.Join(";", merchant, amount, currency, moment, accountId);
+            }
+        }
+
         private void PasteAuthorizations_Click(object sender, EventArgs e)
         {
+            const string regexText = "^\\*(?<account>\\d{4}) Оплата (?<merchant>.+?): " +
+              "(?<amount>\\d+(\\.\\d{1,2})?)RUB " +
+              "(?<moment>\\d{2}\\.\\d{2} \\d{2}:\\d{2}) Доступно (\\d+(\\.\\d{1,2})?)RUB$";
+            Regex regex = new Regex(regexText, RegexOptions.Compiled);
+
             string text = Clipboard.GetText();
             if (text != null)
             {
                 List<string> authLines = new List<string>(text.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries));
+                List<Tuple<Authorization, string>> authorizations = new List<Tuple<Authorization, string>>();
+                List<string> noMatch = new List<string>();
+
+                foreach(string line in authLines) {
+                    Match match = regex.Match(line);
+                    if (match.Success) {
+                        Authorization auth = new Authorization
+                        {
+                            accountId = match.Groups["account"].Value,
+                            amount = decimal.Parse(match.Groups["amount"].Value),
+                            currency = "RUB",
+                            moment = DateTime.ParseExact(match.Groups["moment"].Value, "dd.MM HH:mm", CultureInfo.InvariantCulture),
+                            merchant = match.Groups["merchant"].Value
+                        };
+                        authorizations.Add(new Tuple<Authorization, string>(auth, line));
+                    } else {
+                        noMatch.Add(line);
+                    }
+                }
 
                 DataTable gridTable = (DataTable)GridForm.GridView.DataSource;
 
@@ -188,14 +252,61 @@ namespace Home_Accounting
                     transactions.Add(((DataRowView)viewRow.DataBoundItem).Row);
                 }
 
-                SearchBestMatching(transactions, authLines);
+                SearchBestMatching(transactions, authorizations);
 
-                if (authLines.Count > 0)
+                if (authorizations.Count > 0)
                 {
-                    Clipboard.SetText(string.Join(Environment.NewLine, authLines));
+                    var lines = authorizations.Select(item => item.Item2);
+                    Clipboard.SetText(string.Join(Environment.NewLine, lines));
                 } else
                 {
                     Clipboard.Clear();
+                }
+            }
+        }
+
+        private void SearchBestMatching(List<DataRow> transactions, List<Tuple<Authorization, string>> authorizations) {
+            if (transactions.Count == 0) return;
+
+            DataColumn columnAmount = transactions[0].Table.Columns["Amount"];
+            DataColumn columnDescription = transactions[0].Table.Columns["Description"];
+            DataColumn columnAuth = transactions[0].Table.Columns["Authorization"];
+
+            const string regexText =
+                @"^(?<merchant>.+?)\,.*(?<moment>\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}) карта \*(?<account>\d{4})$";
+            Regex regex = new Regex(regexText, RegexOptions.Compiled);
+
+            var transactionAuths = new List<Tuple<Authorization, DataRow>>();
+
+            foreach (DataRow transaction in transactions) {
+                decimal amount = (decimal)transaction[columnAmount];
+                string description = (string)transaction[columnDescription];
+
+                Match match = regex.Match(description);
+                if (match.Success) {
+                    Authorization auth = new Authorization
+                    {
+                        accountId = match.Groups["account"].Value,
+                        amount = amount,
+                        currency = "RUB",
+                        moment = DateTime.ParseExact(match.Groups["moment"].Value, "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture),
+                        merchant = match.Groups["merchant"].Value
+                    };
+
+                    transactionAuths.Add(new Tuple<Authorization, DataRow>(auth, transaction));
+                }
+            }
+            foreach (var tolerance in new TimeSpan[]{ new TimeSpan(), TimeSpan.FromMinutes(1) }) {
+                for (int i = 0; i < transactionAuths.Count; ) {
+                    var transactionAuth = transactionAuths[i];
+                    var found = authorizations.Find(item => item.Item1.AuthEquals(transactionAuth.Item1, tolerance));
+                    if (found != null) {
+                        transactionAuth.Item2[columnAuth] = found.Item2;
+                        authorizations.Remove(found);
+                        transactionAuths.Remove(transactionAuth);
+                    } else {
+                        ++i;
+                    }
                 }
             }
         }
