@@ -15,6 +15,9 @@ namespace Home_Accounting
     {
         private readonly int accountID;
         private Button pasteAuthorizations = new Button() { Text = "Paste Auth" };
+        private TextBox findText = new TextBox();
+        private Label findResultsLabel = new Label();
+        private List<int> findResults;
 
         private static string FormatFilter(int accountID)
         {
@@ -38,17 +41,113 @@ namespace Home_Accounting
 
             pasteAuthorizations.Click += PasteAuthorizations_Click;
             GridForm.AddControl(pasteAuthorizations);
+            findText.TextChanged += FindText_TextChanged;
+            findText.KeyDown += FindText_KeyDown;
+            GridForm.AddControl(findText);
+            findResultsLabel.AutoSize = true;
+            GridForm.AddControl(findResultsLabel);
 
             GridForm.KeyPreview = true;
             GridForm.KeyDown += GridForm_KeyDown;
         }
 
+        private void FindText_KeyDown(object sender, KeyEventArgs e) {
+            if (e.Modifiers == Keys.None && e.KeyCode == Keys.Escape) {
+                GridForm.GridView.Focus();
+                findResultsLabel.Text = "";
+                findResults = null;
+                e.SuppressKeyPress = true;
+                e.Handled = true;
+            }
+        }
+
+        private void FindText_TextChanged(object sender, EventArgs e) {
+            Find(next:false, back:false);
+        }
+
         private void GridForm_KeyDown(object sender, KeyEventArgs e) {
             if (e.KeyCode == Keys.S && e.Modifiers.HasFlag(Keys.Control)) {
-
             	SaveSelection_Click(sender, e);
                 e.Handled = true;
                 e.SuppressKeyPress = true;
+            } else if (e.KeyCode == Keys.F && e.Modifiers.HasFlag(Keys.Control)) {
+                bool shift = e.Modifiers.HasFlag(Keys.Shift);
+
+                if (!findText.Focused) {
+                    findText.SelectAll();
+                    findText.Focus();
+                    Find(next:false, back:shift);
+                } else {
+                    Find(next:true, back:shift);
+                }
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
+        }
+
+        private List<int> FindRows(string text) {
+            List<int> found = new List<int>();
+            foreach (DataGridViewRow row in GridForm.GridView.Rows) {
+                bool CellContains(DataGridViewCell cell) {
+                    bool res = false;
+                    if (cell.FormattedValue is string value) {
+                        res = value.Contains(text);
+                    }
+                    return res;
+                }
+                if (row.Cells.Cast<DataGridViewCell>().Any(CellContains)) {
+                    found.Add(row.Index);
+                }
+            }
+            return found;
+        }
+
+        private int SelectFoundResult(List<int> results, int startRow, bool next, bool back) {
+            if (results == null || results.Count == 0) {
+                return 0;
+            }
+            // for x slightly outside [0,range), 
+            // -1 becomes range-1, range becomes 0
+            int OverflowClamp(int x, int range) {
+                return (x + range) % range;
+            }
+
+            if (next) {
+                int movement = back ? -1 : 1;
+                startRow = OverflowClamp(startRow + movement, GridForm.GridView.RowCount);
+            }
+            int index = results.BinarySearch(startRow);
+            if (index < 0) { // if >= 0 exact match is found
+                index = ~index; // bitwise complement if first index with bigger value
+                index = OverflowClamp(index + (back ? -1 : 0), results.Count); // for back get index with smaller value
+            }
+            return results[index];
+        }
+
+        private static string FormatFoundResults(List<int> results, int selection) {
+            return string.Format("{0} of {1}", 
+                results.IndexOf(selection) + 1, results.Count);
+        }
+
+        private void Find(bool next, bool back) {
+            var results = next ? findResults : FindRows(findText.Text);
+
+            int currentRow = SelectFoundResult(results,
+                GridForm.GridView.CurrentCellAddress.Y, next, back);
+
+            findResultsLabel.Text = FormatFoundResults(results, 
+                currentRow);
+            this.findResults = results;
+
+            if (GridForm.GridView.CurrentCellAddress.Y != currentRow) {
+                GridForm.GridView.CurrentCell = 
+                    GridForm.GridView.Rows[currentRow].Cells[GridForm.GridView.CurrentCellAddress.X];
+            }
+            if (GridForm.GridView.SelectedRows.Count != 1 || 
+                GridForm.GridView.SelectedRows[0].Index != currentRow) {
+
+                GridForm.GridView.ClearSelection();
+                GridForm.GridView.Rows[currentRow].Selected = true;
             }
         }
 
