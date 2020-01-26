@@ -59,7 +59,7 @@
             // 
             this.checkToolStripMenuItem.Name = "checkToolStripMenuItem";
             this.checkToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.checkToolStripMenuItem.Text = "Check";
+            this.checkToolStripMenuItem.Text = "Bank Statement";
             this.checkToolStripMenuItem.Click += new System.EventHandler(this.CheckToolStripMenuItem_Click);
             // 
             // clipboardToolStripMenuItem
