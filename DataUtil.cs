@@ -72,6 +72,7 @@ namespace Home_Accounting
 
         public static void UpgradeDatabase()
         {
+            // types used til now: TEXT, BIT, INTEGER, COUNTER, CURRENCY, DATETIME
             foreach (string tableName in new string[] { "Account", "Debt" })
             {
                 CreateColumn(tableName, "Currency", "TEXT(3)");
@@ -80,6 +81,7 @@ namespace Home_Accounting
             AssureColumnSize("Purchase", "Name", "TEXT", 100);
             CreateColumnWithDefault("Account", "Active", "BIT", 1);
             CreateColumn("Debt", "AmountBack", "CURRENCY");
+            CreateColumn("Account", "StatementName", "TEXT(50)"); // regex to match statement file name
         }
         private static void CreateColumnWithDefault(string tableName, string columnName, string type, object defaultValue)
         {
