@@ -61,7 +61,7 @@ namespace Home_Accounting
             this.buttonCheck.TabIndex = 1;
             this.buttonCheck.Text = "Сверить";
             this.buttonCheck.UseVisualStyleBackColor = true;
-            this.buttonCheck.Click += new System.EventHandler(this.buttonCheck_Click);
+            this.buttonCheck.Click += new System.EventHandler(this.ButtonCheck_Click);
             // 
             // labelCheck
             // 

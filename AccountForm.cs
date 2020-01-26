@@ -148,8 +148,10 @@ namespace Home_Accounting
                         string text = string.Format("Погашение {0} от {1} в {2}?",
                             dataRow["Amount"], dataRow["Name"], this.Text);
 
-                        DebtReturnForm returnForm = new DebtReturnForm();
-                        returnForm.Message = text;
+                        DebtReturnForm returnForm = new DebtReturnForm
+                        {
+                            Message = text
+                        };
 
                         DialogResult dialogResult = returnForm.ShowDialog(this);
                         if (dialogResult == DialogResult.OK)
@@ -189,7 +191,7 @@ namespace Home_Accounting
             ReloadData();
         }
 
-        private void buttonCheck_Click(object sender, EventArgs e)
+        private void ButtonCheck_Click(object sender, EventArgs e)
         {
             new CheckAccountForm(this).ShowDialog();            
         }
