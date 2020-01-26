@@ -243,14 +243,16 @@ namespace Home_Accounting
 
         private void LoadStatement()
         {
-            int accountID = 0;
-
             List<Statement.Transaction> transactions = new List<Statement.Transaction>();
 
             OpenFileDialog dialog = new OpenFileDialog();
             if (dialog.ShowDialog(this) == DialogResult.OK)
             {
-                if (dialog.FileName.EndsWith(".xml")) // processing citibank
+                string fileName = Path.GetFileName(dialog.FileName);
+
+                int? accountID = Account.StatementNameToID(fileName);
+
+                if (fileName.EndsWith(".xml")) // processing citibank
                 {
                     accountID = 12;
                     string contents = System.IO.File.ReadAllText(dialog.FileName, Encoding.Default);
@@ -272,7 +274,20 @@ namespace Home_Accounting
                 }
                 else if(dialog.FileName.EndsWith(".csv")) 
                 {
-                    if (Path.GetFileName(dialog.FileName).StartsWith("report")) // processing russian standard
+                    if (fileName.StartsWith("raif-")) {
+                        string[] lines = System.IO.File.ReadAllLines(dialog.FileName, Encoding.Default);
+                        for (int i = lines.Length - 1; i >= 1; --i) { // skip 0 line as a header
+                            string line = lines[i];
+                            var fields = line.Split(';');
+                            Statement.Transaction transaction = new Statement.Transaction();
+                            transaction.amount = Decimal.Parse(fields[5]);
+                            transaction.date = DateTime.Parse(fields[0]);
+                            transaction.description = fields[1];
+                            transaction.sourceText = line;
+                            transactions.Add(transaction);
+                        }
+                    }
+                    else if (fileName.StartsWith("report")) // processing russian standard
                     {
                         accountID = 13;
 
@@ -308,7 +323,7 @@ namespace Home_Accounting
                             transactions.Add(transaction);
                         }
                     }
-                    else if (Path.GetFileName(dialog.FileName).StartsWith("avangard-")) // processing avangard
+                    else if (fileName.StartsWith("avangard-")) // processing avangard
                     {
                         // read csv into list
                         string[] lines = System.IO.File.ReadAllLines(dialog.FileName, Encoding.Default);
@@ -355,7 +370,7 @@ namespace Home_Accounting
                             transactions.Add(transaction);
                         }
                     }
-                    else if (Path.GetFileName(dialog.FileName).StartsWith("statement_")) // processing Sankt-Peterburg
+                    else if (fileName.StartsWith("statement_")) // processing Sankt-Peterburg
                     {
                         accountID = 19;
 
@@ -392,7 +407,7 @@ namespace Home_Accounting
                             validLineIndex = i;
                         }
                     }
-                    else if (Path.GetFileName(dialog.FileName).StartsWith("alfa-")) // processing Alfa
+                    else if (fileName.StartsWith("alfa-")) // processing Alfa
                     {
                         // read csv into list
                         string[] lines = System.IO.File.ReadAllLines(dialog.FileName, Encoding.Default);
@@ -422,13 +437,13 @@ namespace Home_Accounting
                         }
                     }
                 }
-                if(accountID == 0)
+                if (accountID == null || accountID == 0)
                 {
                     MessageBox.Show(dialog.FileName + " is unknown");
                 }
                 else
                 {
-                    var form = new BankPurchaseSpreadSheet(transactions, accountID);
+                    var form = new BankPurchaseSpreadSheet(transactions, accountID.Value);
                     form.Show(this);
                 }
             }
