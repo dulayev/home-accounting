@@ -348,6 +348,9 @@ namespace Home_Accounting
                             moment = DateTime.ParseExact(match.Groups["moment"].Value, "dd.MM HH:mm", CultureInfo.InvariantCulture),
                             merchant = match.Groups["merchant"].Value
                         };
+                        if (auth.moment > DateTime.Now) { // passed auth year parsed wrong to current
+                            auth.moment = auth.moment.AddYears(-1);
+                        }
                         authorizations.Add(new Tuple<Authorization, string>(auth, line));
                     } else {
                         noMatch.Add(line);
