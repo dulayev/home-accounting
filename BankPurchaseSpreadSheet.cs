@@ -370,7 +370,8 @@ namespace Home_Accounting
                 if (authorizations.Count > 0)
                 {
                     var lines = authorizations.Select(item => item.Item2);
-                    Clipboard.SetText(string.Join(Environment.NewLine, lines));
+                    noMatch.AddRange(lines);
+                    Clipboard.SetText(string.Join(Environment.NewLine, noMatch));
                 } else
                 {
                     Clipboard.Clear();
