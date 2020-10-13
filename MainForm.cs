@@ -213,11 +213,12 @@ namespace Home_Accounting
             return null;
         }
 
-        private static string TrimSymmetric(string text, char symbol)
-        {
+        private static string Dequote(string text) {
+            const char symbol = '"';
             while (text.Length >= 2 && text[0] == symbol && text[text.Length - 1] == symbol)
             {
                 text = text.Substring(1, text.Length - 2);
+                text = text.Replace(new string(symbol, 2), new string(symbol, 1));
             }
             return text;
         }
@@ -393,7 +394,7 @@ namespace Home_Accounting
                             Statement.Transaction transaction = new Statement.Transaction
                             {
                                 date = inDate,
-                                description = TrimSymmetric(fields[2], '\"') + " " + TrimSymmetric(fields[3], '\"'),
+                                description = Dequote(fields[2]) + " " + Dequote(fields[3]),
                                 amount = inAmount,
                                 sourceText = line
                             };
