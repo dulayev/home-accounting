@@ -310,7 +310,7 @@ namespace Home_Accounting
             public bool AuthEquals(Authorization other, TimeSpan tolerance) {
                 bool CommonEquals(string a, string b) {
                     int len = Math.Min(a.Length, b.Length);
-                    return string.Compare(a, 0, b, 0, len) == 0;
+                    return string.Compare(a, 0, b, 0, len, true/*ignore case*/) == 0;
                 }
                 return CommonEquals(merchant, other.merchant) &&
                     amount == other.amount &&
